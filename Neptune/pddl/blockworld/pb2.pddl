@@ -1,0 +1,8 @@
+(define (problem pb2)
+   (:domain blocksworld)
+   (:requirements :strips :equality :constraints :quantified-preconditions :disjunctive-preconditions :negative-preconditions :derived-predicates)
+   (:objects a b)
+   (:init (on-table a) (on-table b) (clear a) (clear b) (arm-empty))
+   ;(:goal (on a b))
+   ;(:goal (and (not (on b a)) (on a b))))
+   ;(:goal (or (and (clear a) (on a b)) (and (not (on a b)) (on b a) (clear b))))))

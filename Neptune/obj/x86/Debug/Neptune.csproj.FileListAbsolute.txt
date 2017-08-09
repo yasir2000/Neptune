@@ -1,0 +1,58 @@
+C:\Users\peter\AppData\Local\Temporary Projects\Neptune\bin\Debug\Neptune.exe
+C:\Users\peter\AppData\Local\Temporary Projects\Neptune\bin\Debug\Neptune.pdb
+C:\Users\peter\AppData\Local\Temporary Projects\Neptune\bin\Debug\clojure.core.clj.dll
+C:\Users\peter\AppData\Local\Temporary Projects\Neptune\bin\Debug\clojure.core_clr.clj.dll
+C:\Users\peter\AppData\Local\Temporary Projects\Neptune\bin\Debug\Clojure.dll
+C:\Users\peter\AppData\Local\Temporary Projects\Neptune\bin\Debug\Microsoft.Dynamic.dll
+C:\Users\peter\AppData\Local\Temporary Projects\Neptune\bin\Debug\Microsoft.Scripting.dll
+C:\Users\peter\AppData\Local\Temporary Projects\Neptune\bin\Debug\clojure.core.protocols.clj.dll
+C:\Users\peter\AppData\Local\Temporary Projects\Neptune\bin\Debug\Clojure.pdb
+C:\Users\peter\AppData\Local\Temporary Projects\Neptune\bin\Debug\clojure.core.clj.pdb
+C:\Users\peter\AppData\Local\Temporary Projects\Neptune\bin\Debug\clojure.core_clr.clj.pdb
+C:\Users\peter\AppData\Local\Temporary Projects\Neptune\bin\Debug\Microsoft.Dynamic.pdb
+C:\Users\peter\AppData\Local\Temporary Projects\Neptune\bin\Debug\Microsoft.Scripting.pdb
+C:\Users\peter\AppData\Local\Temporary Projects\Neptune\bin\Debug\clojure.core.protocols.clj.pdb
+C:\Users\peter\AppData\Local\Temporary Projects\Neptune\obj\x86\Debug\ResolveAssemblyReference.cache
+C:\Users\peter\AppData\Local\Temporary Projects\Neptune\obj\x86\Debug\Neptune.Properties.Resources.resources
+C:\Users\peter\AppData\Local\Temporary Projects\Neptune\obj\x86\Debug\GenerateResource.read.1.tlog
+C:\Users\peter\AppData\Local\Temporary Projects\Neptune\obj\x86\Debug\GenerateResource.write.1.tlog
+C:\Users\peter\AppData\Local\Temporary Projects\Neptune\obj\x86\Debug\Neptune.exe
+C:\Users\peter\AppData\Local\Temporary Projects\Neptune\obj\x86\Debug\Neptune.pdb
+C:\Users\peter\documents\visual studio 2010\Projects\Neptune\Neptune\obj\x86\Debug\Neptune.exe
+C:\Users\peter\documents\visual studio 2010\Projects\Neptune\Neptune\obj\x86\Debug\Neptune.pdb
+C:\Users\peter\documents\visual studio 2010\Projects\Neptune\Neptune\bin\Debug\Neptune.exe
+C:\Users\peter\documents\visual studio 2010\Projects\Neptune\Neptune\bin\Debug\Neptune.pdb
+C:\Users\peter\documents\visual studio 2010\Projects\Neptune\Neptune\bin\Debug\clojure.core.clj.dll
+C:\Users\peter\documents\visual studio 2010\Projects\Neptune\Neptune\bin\Debug\clojure.core_clr.clj.dll
+C:\Users\peter\documents\visual studio 2010\Projects\Neptune\Neptune\bin\Debug\Clojure.dll
+C:\Users\peter\documents\visual studio 2010\Projects\Neptune\Neptune\bin\Debug\Microsoft.Dynamic.dll
+C:\Users\peter\documents\visual studio 2010\Projects\Neptune\Neptune\bin\Debug\Microsoft.Scripting.dll
+C:\Users\peter\documents\visual studio 2010\Projects\Neptune\Neptune\bin\Debug\clojure.core.protocols.clj.dll
+C:\Users\peter\documents\visual studio 2010\Projects\Neptune\Neptune\bin\Debug\Clojure.pdb
+C:\Users\peter\documents\visual studio 2010\Projects\Neptune\Neptune\bin\Debug\clojure.core.clj.pdb
+C:\Users\peter\documents\visual studio 2010\Projects\Neptune\Neptune\bin\Debug\clojure.core_clr.clj.pdb
+C:\Users\peter\documents\visual studio 2010\Projects\Neptune\Neptune\bin\Debug\Microsoft.Dynamic.pdb
+C:\Users\peter\documents\visual studio 2010\Projects\Neptune\Neptune\bin\Debug\Microsoft.Scripting.pdb
+C:\Users\peter\documents\visual studio 2010\Projects\Neptune\Neptune\bin\Debug\clojure.core.protocols.clj.pdb
+C:\Users\peter\documents\visual studio 2010\Projects\Neptune\Neptune\obj\x86\Debug\ResolveAssemblyReference.cache
+C:\Users\peter\documents\visual studio 2010\Projects\Neptune\Neptune\obj\x86\Debug\Neptune.Properties.Resources.resources
+C:\Users\peter\documents\visual studio 2010\Projects\Neptune\Neptune\obj\x86\Debug\GenerateResource.read.1.tlog
+C:\Users\peter\documents\visual studio 2010\Projects\Neptune\Neptune\obj\x86\Debug\GenerateResource.write.1.tlog
+C:\Users\peter\documents\visual studio 2010\Projects\Neptune\Neptune\obj\x86\Debug\Neptune.ScriptBrowser.resources
+C:\Users\peter\documents\visual studio 2010\Projects\Neptune\Neptune\obj\x86\Debug\Neptune.NeptuneIDE.resources
+C:\Users\peter\documents\visual studio 2010\Projects\Neptune\Neptune\obj\x86\Debug\Neptune.Console.resources
+C:\Users\peter\documents\visual studio 2010\Projects\Neptune\Neptune\obj\x86\Debug\Neptune.MethodsEditor.resources
+C:\Users\peter\documents\visual studio 2010\Projects\Neptune\Neptune\obj\x86\Debug\Neptune.NblosEditor.resources
+C:\Users\peter\documents\visual studio 2010\Projects\Neptune\Neptune\obj\x86\Debug\Neptune.NbloRadioButtons.resources
+C:\Users\peter\documents\visual studio 2010\Projects\Neptune\Neptune\obj\x86\Debug\Neptune.NbloListSelect.resources
+C:\Users\peter\documents\visual studio 2010\Projects\Neptune\Neptune\bin\Debug\Neptune.exe.config
+C:\Users\peter\documents\visual studio 2010\Projects\Neptune\Neptune\bin\Debug\PDDLParser.dll
+C:\Users\peter\documents\visual studio 2010\Projects\Neptune\Neptune\bin\Debug\TLPlanLib.dll
+C:\Users\peter\documents\visual studio 2010\Projects\Neptune\Neptune\bin\Debug\PDDLParser.pdb
+C:\Users\peter\documents\visual studio 2010\Projects\Neptune\Neptune\bin\Debug\PDDLParser.xml
+C:\Users\peter\documents\visual studio 2010\Projects\Neptune\Neptune\bin\Debug\TLPlanLib.pdb
+C:\Users\peter\documents\visual studio 2010\Projects\Neptune\Neptune\bin\Debug\TLPlanLib.xml
+C:\Users\peter\documents\visual studio 2010\Projects\Neptune\Neptune\bin\Debug\GUITLPlan.pdb
+C:\Users\peter\documents\visual studio 2010\Projects\Neptune\Neptune\bin\Debug\GUITLPlan.xml
+C:\Users\peter\documents\visual studio 2010\Projects\Neptune\Neptune\bin\Debug\GUITLPlan.dll
+C:\Users\peter\documents\visual studio 2010\Projects\Neptune\Neptune\obj\x86\Debug\Neptune.PddlBrowser.resources

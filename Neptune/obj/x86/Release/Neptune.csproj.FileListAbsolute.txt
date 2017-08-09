@@ -1,0 +1,14 @@
+C:\Users\peter\Documents\Visual Studio 2010\Projects\Neptune\Neptune\obj\x86\Release\ResolveAssemblyReference.cache
+C:\Users\peter\Documents\Visual Studio 2010\Projects\Neptune\Neptune\obj\x86\Release\Neptune.AspectEditor.resources
+C:\Users\peter\Documents\Visual Studio 2010\Projects\Neptune\Neptune\obj\x86\Release\Neptune.Console.resources
+C:\Users\peter\Documents\Visual Studio 2010\Projects\Neptune\Neptune\obj\x86\Release\Neptune.GoalsEditor.resources
+C:\Users\peter\Documents\Visual Studio 2010\Projects\Neptune\Neptune\obj\x86\Release\Neptune.MethodsEditor.resources
+C:\Users\peter\Documents\Visual Studio 2010\Projects\Neptune\Neptune\obj\x86\Release\Neptune.NbloListSelect.resources
+C:\Users\peter\Documents\Visual Studio 2010\Projects\Neptune\Neptune\obj\x86\Release\Neptune.NblosEditor.resources
+C:\Users\peter\Documents\Visual Studio 2010\Projects\Neptune\Neptune\obj\x86\Release\Neptune.NeptuneIDE.resources
+C:\Users\peter\Documents\Visual Studio 2010\Projects\Neptune\Neptune\obj\x86\Release\Neptune.Properties.Resources.resources
+C:\Users\peter\Documents\Visual Studio 2010\Projects\Neptune\Neptune\obj\x86\Release\Neptune.NbloRadioButtons.resources
+C:\Users\peter\Documents\Visual Studio 2010\Projects\Neptune\Neptune\obj\x86\Release\Neptune.ScriptBrowser.resources
+C:\Users\peter\Documents\Visual Studio 2010\Projects\Neptune\Neptune\obj\x86\Release\Neptune.WebBrowser.resources
+C:\Users\peter\Documents\Visual Studio 2010\Projects\Neptune\Neptune\obj\x86\Release\GenerateResource.read.1.tlog
+C:\Users\peter\Documents\Visual Studio 2010\Projects\Neptune\Neptune\obj\x86\Release\GenerateResource.write.1.tlog

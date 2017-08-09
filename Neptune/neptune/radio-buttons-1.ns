@@ -1,0 +1,51 @@
+//------------------------
+// NeptuneScript 2.1
+// Radio Buttons 1
+//------------------------
+
+//------------------------
+task { TestTask }
+//------------------------
+actions {
+ TestAction : println("Hello World!")
+}; 
+
+//------------------------
+process TestProcess :
+//------------------------
+{
+  var s, ans,title,question,choice1,choice2;
+  title = "This is a radio widget";
+  question = "Choose Red or Blue";
+  choice1 = "Red";
+  choice2 = "Blue";
+  ans = nsfn("NbloRadio", title, question, choice1, choice2);
+  s = format("You chose [%s]", ans); 
+  println(s);
+};
+
+//------------------------
+nblo NbloRadio (title, question, choice1, choice2)
+//------------------------
+{!-
+ (let*
+
+ [
+
+  rb (Neptune.NbloRadioButtons.)
+
+  ]
+
+  (.set_Text rb (str title))
+
+  (.SetQuestion rb (str question))
+
+  (.SetChoice_1 rb (str choice1))
+
+  (.SetChoice_2 rb (str choice2))
+
+  (.ShowDialog rb)
+
+  (.GetSelection rb)
+ )
+-!};

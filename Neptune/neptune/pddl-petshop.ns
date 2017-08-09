@@ -1,0 +1,40 @@
+//------------------------
+// NeptuneScript 2.1
+// PDDL PetShop
+//------------------------
+
+//------------------------
+task { PetShopTask }
+//------------------------
+actions {
+ PetShopAction : println("This is PetShop!")
+}; 
+
+//------------------------
+process PetShopProcess :
+//------------------------
+{
+  var probname, n;
+  for(n=1; n<=1; n=n+1) {
+    probname = nsfn("StrCat", "pb", n);
+    nsfn("RunPDDL",
+         "PetShop",
+         "petshop",
+         "petshop",
+         probname);
+  }
+};
+
+//------------------------
+nblo RunPDDL (name, directory, domain, problem)
+//------------------------
+{!-
+ (pddl-run name directory domain problem)
+-!};
+
+//------------------------
+nblo StrCat (s1 s2)
+//------------------------
+{!-
+ (str s1 s2)
+-!};

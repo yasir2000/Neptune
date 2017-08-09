@@ -1,0 +1,313 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.21022</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{00FAEB45-9839-4270-8CCA-43AA5DDCC465}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>PDDLParser</RootNamespace>
+    <AssemblyName>PDDLParser</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <StartupObject>
+    </StartupObject>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <OldToolsVersion>3.5</OldToolsVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Debug\PDDLParser.XML</DocumentationFile>
+    <NoWarn>1591</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Release\PDDLParser.XML</DocumentationFile>
+    <NoWarn>1591</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data.DataSetExtensions">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Action\AbstractActionDef.cs" />
+    <Compile Include="Action\Action.cs" />
+    <Compile Include="Action\ContinuousVariable.cs" />
+    <Compile Include="Action\DurationVariable.cs" />
+    <Compile Include="Action\DurativeAction.cs" />
+    <Compile Include="Action\IActionDef.cs" />
+    <Compile Include="Exception\BindingException.cs" />
+    <Compile Include="Exception\CycleException.cs" />
+    <Compile Include="Exception\NumericException.cs" />
+    <Compile Include="Exception\ParserException.cs" />
+    <Compile Include="Exception\TypingException.cs" />
+    <Compile Include="Exception\UndefinedExpException.cs" />
+    <Compile Include="Exception\UnknownExpException.cs" />
+    <Compile Include="ExpController.cs" />
+    <Compile Include="Exp\AbstractAndExp.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Exp\AbstractExp.cs" />
+    <Compile Include="Exp\AbstractForallExp.cs" />
+    <Compile Include="Exp\Comparison\ComparisonExp.cs" />
+    <Compile Include="Exp\Comparison\GreaterComp.cs" />
+    <Compile Include="Exp\Comparison\GreaterEqualComp.cs" />
+    <Compile Include="Exp\Comparison\LessComp.cs" />
+    <Compile Include="Exp\Comparison\LessEqualComp.cs" />
+    <Compile Include="Exp\Comparison\NumericCompExp.cs" />
+    <Compile Include="Exp\Comparison\NumericEqualComp.cs" />
+    <Compile Include="Exp\Comparison\ObjectEqualComp.cs" />
+    <Compile Include="Exp\Constraint\AbstractConstraintExp.cs" />
+    <Compile Include="Exp\Constraint\AlwaysExp.cs" />
+    <Compile Include="Exp\Constraint\AlwaysWithinExp.cs" />
+    <Compile Include="Exp\Constraint\AtEndConstraintExp.cs" />
+    <Compile Include="Exp\Constraint\AtMostOnceExp.cs" />
+    <Compile Include="Exp\Constraint\BinaryConstraintExp.cs" />
+    <Compile Include="Exp\Constraint\Composite\AndConstraintExp.cs" />
+    <Compile Include="Exp\Constraint\Composite\ExistsConstraintExp.cs" />
+    <Compile Include="Exp\Constraint\Composite\ForallConstraintExp.cs" />
+    <Compile Include="Exp\Constraint\Composite\ImplyConstraintExp.cs" />
+    <Compile Include="Exp\Constraint\Composite\NotConstraintExp.cs" />
+    <Compile Include="Exp\Constraint\Composite\OrConstraintExp.cs" />
+    <Compile Include="Exp\Constraint\Composite\TLPlan\ExistsUniqueConstraintExp.cs" />
+    <Compile Include="Exp\Constraint\Composite\TLPlan\IfThenElseConstraintExp.cs" />
+    <Compile Include="Exp\Constraint\Composite\TLPlan\XorUniqueConstraintExp.cs" />
+    <Compile Include="Exp\Constraint\DerivedConstraintExp.cs" />
+    <Compile Include="Exp\Constraint\HoldAfterExp.cs" />
+    <Compile Include="Exp\Constraint\HoldDuringExp.cs" />
+    <Compile Include="Exp\Constraint\SometimeAfterExp.cs" />
+    <Compile Include="Exp\Constraint\SometimeBeforeExp.cs" />
+    <Compile Include="Exp\Constraint\SometimeExp.cs" />
+    <Compile Include="Exp\Constraint\TLPlan\AbsoluteTAlwaysExp.cs" />
+    <Compile Include="Exp\Constraint\TLPlan\AbsoluteTEventuallyExp.cs" />
+    <Compile Include="Exp\Constraint\TLPlan\AbsoluteTUntilExp.cs" />
+    <Compile Include="Exp\Constraint\TLPlan\EventuallyExp.cs" />
+    <Compile Include="Exp\Constraint\TLPlan\IntervalConstraintExp.cs" />
+    <Compile Include="Exp\Constraint\TLPlan\NextExp.cs" />
+    <Compile Include="Exp\Constraint\TLPlan\TAlwaysExp.cs" />
+    <Compile Include="Exp\Constraint\TLPlan\TEventuallyExp.cs" />
+    <Compile Include="Exp\Constraint\TLPlan\TUntilExp.cs" />
+    <Compile Include="Exp\Constraint\TLPlan\UntilExp.cs" />
+    <Compile Include="Exp\Constraint\TLPlan\WeakUntilExp.cs" />
+    <Compile Include="Exp\Constraint\UnaryConstraintExp.cs" />
+    <Compile Include="Exp\Constraint\WithinExp.cs" />
+    <Compile Include="Exp\Effect\AndEffect.cs" />
+    <Compile Include="Exp\Effect\Assign\AssignEffect.cs" />
+    <Compile Include="Exp\Effect\Assign\Decrease.cs" />
+    <Compile Include="Exp\Effect\Assign\Increase.cs" />
+    <Compile Include="Exp\Effect\Assign\NumericAssign.cs" />
+    <Compile Include="Exp\Effect\Assign\NumericAssignEffect.cs" />
+    <Compile Include="Exp\Effect\Assign\ObjectAssign.cs" />
+    <Compile Include="Exp\Effect\Assign\ScaleDown.cs" />
+    <Compile Include="Exp\Effect\Assign\ScaleUp.cs" />
+    <Compile Include="Exp\Effect\DurativeWhenEffect.cs" />
+    <Compile Include="Exp\Effect\ForallEffect.cs" />
+    <Compile Include="Exp\Effect\NotAtomicFormulaApplication.cs" />
+    <Compile Include="Exp\Effect\TimedLiteral.cs" />
+    <Compile Include="Exp\Effect\WhenEffect.cs" />
+    <Compile Include="Exp\Formula\ArgsEvalResult.cs" />
+    <Compile Include="Exp\Formula\Defined\DefinedFormula.cs" />
+    <Compile Include="Exp\Formula\Defined\DefinedFormulaApplication.cs" />
+    <Compile Include="Exp\Formula\Defined\DerivedPredicate.cs" />
+    <Compile Include="Exp\Formula\Defined\TLPlan\DefinedFunction.cs" />
+    <Compile Include="Exp\Formula\Defined\TLPlan\DefinedNumericFunction.cs" />
+    <Compile Include="Exp\Formula\Defined\TLPlan\DefinedNumericFunctionApplication.cs" />
+    <Compile Include="Exp\Formula\Defined\TLPlan\DefinedObjectFunction.cs" />
+    <Compile Include="Exp\Formula\Defined\TLPlan\DefinedObjectFunctionApplication.cs" />
+    <Compile Include="Exp\Formula\Defined\TLPlan\DefinedPredicate.cs" />
+    <Compile Include="Exp\Formula\Defined\TLPlan\DefinedPredicateApplication.cs" />
+    <Compile Include="Exp\Formula\Defined\TLPlan\LocalVar\AssignBooleanLocalVar.cs" />
+    <Compile Include="Exp\Formula\Defined\TLPlan\LocalVar\AssignLocalVar.cs" />
+    <Compile Include="Exp\Formula\Defined\TLPlan\LocalVar\AssignNumericLocalVar.cs" />
+    <Compile Include="Exp\Formula\Defined\TLPlan\LocalVar\AssignObjectLocalVar.cs" />
+    <Compile Include="Exp\Formula\Defined\TLPlan\LocalVar\BooleanLocalVariable.cs" />
+    <Compile Include="Exp\Formula\Defined\TLPlan\LocalVar\BooleanVariable.cs" />
+    <Compile Include="Exp\Formula\Defined\TLPlan\LocalVar\NumericLocalVariable.cs" />
+    <Compile Include="Exp\Formula\Defined\TLPlan\LocalVar\NumericVariable.cs" />
+    <Compile Include="Exp\Formula\Defined\TLPlan\LocalVar\ObjectLocalVariable.cs" />
+    <Compile Include="Exp\Formula\Described\AtomicFormula.cs" />
+    <Compile Include="Exp\Formula\Described\AtomicFormulaApplication.cs" />
+    <Compile Include="Exp\Formula\Described\DescribedFormula.cs" />
+    <Compile Include="Exp\Formula\Described\DescribedFormulaApplication.cs" />
+    <Compile Include="Exp\Formula\Described\Fluent.cs" />
+    <Compile Include="Exp\Formula\Described\FluentApplication.cs" />
+    <Compile Include="Exp\Formula\Described\NumericFluent.cs" />
+    <Compile Include="Exp\Formula\Described\NumericFluentApplication.cs" />
+    <Compile Include="Exp\Formula\Described\ObjectFluent.cs" />
+    <Compile Include="Exp\Formula\Described\ObjectFluentApplication.cs" />
+    <Compile Include="Exp\Formula\FormulaApplication.cs" />
+    <Compile Include="Exp\Formula\FuzzyArgsEvalResult.cs" />
+    <Compile Include="Exp\Formula\RootFormula.cs" />
+    <Compile Include="Exp\IConditionPrefExp.cs" />
+    <Compile Include="Exp\IConstraintExp.cs" />
+    <Compile Include="Exp\IConstraintPrefExp.cs" />
+    <Compile Include="Exp\IEffect.cs" />
+    <Compile Include="Exp\IEvaluableExp.cs" />
+    <Compile Include="Exp\IExp.cs" />
+    <Compile Include="Exp\IInitEl.cs" />
+    <Compile Include="Exp\ILiteral.cs" />
+    <Compile Include="Exp\ILocalVariable.cs" />
+    <Compile Include="Exp\ILogicalExp.cs" />
+    <Compile Include="Exp\INumericExp.cs" />
+    <Compile Include="Exp\IParameterVariable.cs" />
+    <Compile Include="Exp\IPrefExp.cs" />
+    <Compile Include="Exp\ITerm.cs" />
+    <Compile Include="Exp\IVariable.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Exp\ListExp.cs" />
+    <Compile Include="Exp\LocalBindings.cs" />
+    <Compile Include="Exp\Logical\AbstractLogicalExp.cs" />
+    <Compile Include="Exp\Logical\AndExp.cs" />
+    <Compile Include="Exp\Logical\ExistsExp.cs" />
+    <Compile Include="Exp\Logical\FalseExp.cs" />
+    <Compile Include="Exp\Logical\ForallExp.cs" />
+    <Compile Include="Exp\Logical\ImplyExp.cs" />
+    <Compile Include="Exp\Logical\NotExp.cs" />
+    <Compile Include="Exp\Logical\OrExp.cs" />
+    <Compile Include="Exp\Logical\TLPlan\ExistsUniqueExp.cs" />
+    <Compile Include="Exp\Logical\TLPlan\GoalModalityExp.cs" />
+    <Compile Include="Exp\Logical\TLPlan\IfThenElseExp.cs" />
+    <Compile Include="Exp\Logical\TLPlan\XorUniqueExp.cs" />
+    <Compile Include="Exp\Logical\TrueExp.cs" />
+    <Compile Include="Exp\Metric\AbstractForallPrefExp.cs" />
+    <Compile Include="Exp\Metric\AbstractPrefExp.cs" />
+    <Compile Include="Exp\Metric\ConditionPrefExp.cs" />
+    <Compile Include="Exp\Metric\ConstraintPrefExp.cs" />
+    <Compile Include="Exp\Metric\ForallConditionPrefExp.cs" />
+    <Compile Include="Exp\Metric\ForallConstraintPrefExp.cs" />
+    <Compile Include="Exp\Metric\IsViolatedExp.cs" />
+    <Compile Include="Exp\Metric\MaximizeExp.cs" />
+    <Compile Include="Exp\Metric\MetricExp.cs" />
+    <Compile Include="Exp\Metric\MinimizeExp.cs" />
+    <Compile Include="Exp\Metric\OverAllConditionPrefExp.cs" />
+    <Compile Include="Exp\Metric\TotalTimeExp.cs" />
+    <Compile Include="Exp\Numeric\AbstractFunctionExp.cs" />
+    <Compile Include="Exp\Numeric\AbstractNumericExp.cs" />
+    <Compile Include="Exp\Numeric\NArityAdd.cs" />
+    <Compile Include="Exp\Numeric\NArityDivide.cs" />
+    <Compile Include="Exp\Numeric\NArityMultiply.cs" />
+    <Compile Include="Exp\Numeric\NAritySubstract.cs" />
+    <Compile Include="Exp\Numeric\Number.cs" />
+    <Compile Include="Exp\Numeric\TLPlan\BinaryFunctionExp.cs" />
+    <Compile Include="Exp\Numeric\TLPlan\BinaryLogarithm.cs" />
+    <Compile Include="Exp\Numeric\TLPlan\NArityAbsoluteValue.cs" />
+    <Compile Include="Exp\Numeric\TLPlan\NArityExponent.cs" />
+    <Compile Include="Exp\Numeric\TLPlan\NArityMax.cs" />
+    <Compile Include="Exp\Numeric\TLPlan\NArityMin.cs" />
+    <Compile Include="Exp\Numeric\TLPlan\NArityModulo.cs" />
+    <Compile Include="Exp\Numeric\TLPlan\UnaryCeiling.cs" />
+    <Compile Include="Exp\Numeric\TLPlan\UnaryExponential.cs" />
+    <Compile Include="Exp\Numeric\TLPlan\UnaryFloor.cs" />
+    <Compile Include="Exp\Numeric\TLPlan\UnaryFunctionExp.cs" />
+    <Compile Include="Exp\Numeric\TLPlan\UnaryNaturalLogarithm.cs" />
+    <Compile Include="Exp\Numeric\TLPlan\UnaryRound.cs" />
+    <Compile Include="Exp\Numeric\TLPlan\UnarySquareRoot.cs" />
+    <Compile Include="Exp\Numeric\TLPlan\UnaryTruncate.cs" />
+    <Compile Include="Exp\ParameterBindings.cs" />
+    <Compile Include="Exp\QuantifiedExp.cs" />
+    <Compile Include="Exp\ReservedNumericExp.cs" />
+    <Compile Include="Exp\Struct\Bool.cs" />
+    <Compile Include="Exp\Struct\ConstantExp.cs" />
+    <Compile Include="Exp\Struct\Double.cs" />
+    <Compile Include="Exp\Struct\FuzzyBool.cs" />
+    <Compile Include="Exp\Struct\FuzzyConstantExp.cs" />
+    <Compile Include="Exp\Struct\FuzzyDouble.cs" />
+    <Compile Include="Exp\Struct\LogicalValue.cs" />
+    <Compile Include="Exp\Struct\NumericValue.cs" />
+    <Compile Include="Exp\Struct\ProgressionValue.cs" />
+    <Compile Include="Exp\Struct\ShortCircuitBool.cs" />
+    <Compile Include="Exp\Struct\ShortCircuitFuzzyBool.cs" />
+    <Compile Include="Exp\Struct\TermValue.cs" />
+    <Compile Include="Exp\Struct\TimeInterval.cs" />
+    <Compile Include="Exp\Term\AbstractTerm.cs" />
+    <Compile Include="Exp\Term\Constant.cs" />
+    <Compile Include="Exp\Term\ObjectParameterVariable.cs" />
+    <Compile Include="Exp\Term\ObjectVariable.cs" />
+    <Compile Include="Exp\Term\Type\Type.cs" />
+    <Compile Include="Exp\Term\Type\TypeSet.cs" />
+    <Compile Include="Exp\Term\Type\TypeSetSet.cs" />
+    <Compile Include="Exp\UndefinedExp.cs" />
+    <Compile Include="Exp\Variable.cs" />
+    <Compile Include="LinkedDictionary.cs" />
+    <Compile Include="Parser\ErrorManager.cs" />
+    <Compile Include="Parser\IDomain.cs" />
+    <Compile Include="Parser\IProblem.cs" />
+    <Compile Include="Parser\Lexer\JJTLexerState.cs" />
+    <Compile Include="Parser\Lexer\Lexer.cs" />
+    <Compile Include="Parser\Lexer\LexerConstants.cs" />
+    <Compile Include="Parser\Lexer\LexerTokenManager.cs" />
+    <Compile Include="Parser\Lexer\LexerTreeConstants.cs" />
+    <Compile Include="Parser\Lexer\Node.cs" />
+    <Compile Include="Parser\Lexer\ParseException.cs" />
+    <Compile Include="Parser\Lexer\SimpleCharStream.cs" />
+    <Compile Include="Parser\Lexer\SimpleNode.cs" />
+    <Compile Include="Parser\Lexer\Token.cs" />
+    <Compile Include="Parser\Lexer\TokenMgrError.cs" />
+    <Compile Include="Parser\Parser.cs" />
+    <Compile Include="Parser\PDDLObject.cs" />
+    <Compile Include="Parser\RequireKey.cs" />
+    <Compile Include="TLPlanAttribute.cs" />
+    <Compile Include="Extensions.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="World\Context\ActionContext.cs" />
+    <Compile Include="World\Context\EvaluationCache.cs" />
+    <Compile Include="World\Context\EvaluationRecord.cs" />
+    <Compile Include="World\IClosedWorld.cs" />
+    <Compile Include="World\IDurativeClosedWorld.cs" />
+    <Compile Include="World\IDurativeOpenWorld.cs" />
+    <Compile Include="World\IOpenWorld.cs" />
+    <Compile Include="World\IReadOnlyClosedWorld.cs" />
+    <Compile Include="World\IReadOnlyDurativeClosedWorld.cs" />
+    <Compile Include="World\IReadOnlyDurativeOpenWorld.cs" />
+    <Compile Include="World\IReadOnlyOpenWorld.cs" />
+    <Compile Include="World\PartialWorld.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Parser\Lexer\Lexer.jj" />
+    <None Include="Parser\Lexer\Lexer.jjt" />
+    <None Include="Parser\Lexer\NewGrammar.doc" />
+    <None Include="Parser\Lexer\recreateLexer.bat" />
+    <None Include="Parser\Lexer\replaceCS.bat" />
+    <None Include="Parser\Lexer\replaceJJ.bat" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Parser\Lexer\csjavacc.jar" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

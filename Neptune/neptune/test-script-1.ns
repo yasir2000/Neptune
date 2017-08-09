@@ -1,0 +1,31 @@
+//------------------------
+// Neptune 2.1 Test 1
+//------------------------
+
+//------------------------
+task { TestTask }
+//------------------------
+actions {
+ TestAction : println("Hello World!")
+}; 
+
+//------------------------
+process TestProcess :
+//------------------------
+{
+  var s, a, b, c;
+  for(a=0; a<=25; a=a+1) {   
+    for(b=0; b<=5; b=b+1) {
+      c = nsfn("NbloProd", a, b);
+      s = format("The product of [%1$s] and [%2$s] is [%3$s]", a , b, c); 
+      println(s);
+    }
+  }
+};
+
+//------------------------
+nblo NbloProd (a,b)
+//------------------------
+{!-
+(* a b)
+-!};

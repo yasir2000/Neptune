@@ -1,0 +1,12 @@
+C:\Users\peter\Documents\Visual Studio 2010\Projects\Tlplan\PDDLParser\bin\Debug\PDDLParser.XML
+C:\Users\peter\Documents\Visual Studio 2010\Projects\Tlplan\PDDLParser\bin\Debug\PDDLParser.dll
+C:\Users\peter\Documents\Visual Studio 2010\Projects\Tlplan\PDDLParser\bin\Debug\PDDLParser.pdb
+C:\Users\peter\Documents\Visual Studio 2010\Projects\Tlplan\PDDLParser\obj\Debug\ResolveAssemblyReference.cache
+C:\Users\peter\Documents\Visual Studio 2010\Projects\Tlplan\PDDLParser\obj\Debug\PDDLParser.dll
+C:\Users\peter\Documents\Visual Studio 2010\Projects\Tlplan\PDDLParser\obj\Debug\PDDLParser.pdb
+C:\Users\peter\Documents\Visual Studio 2010\Projects\Neptune\PDDLParser\bin\Debug\PDDLParser.dll
+C:\Users\peter\Documents\Visual Studio 2010\Projects\Neptune\PDDLParser\bin\Debug\PDDLParser.pdb
+C:\Users\peter\Documents\Visual Studio 2010\Projects\Neptune\PDDLParser\obj\Debug\ResolveAssemblyReference.cache
+C:\Users\peter\Documents\Visual Studio 2010\Projects\Neptune\PDDLParser\obj\Debug\PDDLParser.dll
+C:\Users\peter\Documents\Visual Studio 2010\Projects\Neptune\PDDLParser\obj\Debug\PDDLParser.pdb
+C:\Users\peter\documents\visual studio 2010\Projects\Neptune\PDDLParser\bin\Debug\PDDLParser.XML

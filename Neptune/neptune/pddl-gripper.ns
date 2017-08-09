@@ -1,0 +1,25 @@
+//------------------------
+// NeptuneScript 2.1
+// PDDL Gripper
+//------------------------
+
+//------------------------
+task { GripperTask }
+//------------------------
+actions {
+ GripperAction : println("This is Gripper!")
+}; 
+
+//------------------------
+process GripperProcess :
+//------------------------
+{
+  nsfn("RunPDDL", "Gripper", "gripper", "gripper", "pb1");
+};
+
+//------------------------
+nblo RunPDDL (name, directory, domain, problem)
+//------------------------
+{!-
+ (pddl-run name directory domain problem)
+-!};

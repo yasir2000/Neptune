@@ -1,0 +1,105 @@
+(define (domain blocksworld)
+  (:requirements :strips :equality :constraints :quantified-preconditions :disjunctive-preconditions :derived-predicates :negative-preconditions :tlplan)
+  (:predicates (clear ?x)
+               (on-table ?x)
+               (arm-empty)
+               (holding ?x)
+               (on ?x ?y))
+  
+  (:constraints
+;      (always (forall (?x) (imply (clear ?x) 
+;                                  (imply (goodtower ?x) (next (goodtowerabove ?x))))))
+   
+;      (always (forall (?x) (imply (clear ?x) 
+;                                  (and (imply (goodtower ?x) (next (goodtowerabove ?x)))
+;                                       (imply (badtower ?x) (next (not (exists (?y) (on ?y ?x)))))
+;                                       ))))
+   
+   (always (forall (?x) (imply (clear ?x) 
+                               (and (imply (goodtower ?x) (next (goodtowerabove ?x)))
+                                    (imply (badtower ?x) (next (not (exists (?y) (on ?y ?x)))))
+                                    (imply (and (on-table ?x) 
+                                                (exists (?y) (and (GOAL (on ?x ?y))(not (goodtower ?y)))))(next (not (holding ?x))))
+                                    ))))
+  )
+  
+  (:derived (above ?x ?y) 
+            (or (on ?x ?y)
+                (exists (?z) (and (on ?x ?z)
+                                  (above ?z ?y)))))
+  
+  (:derived (goodtowerbelow ?x)
+            (or (and (on-table ?x)
+                     (GOAL (on-table ?x)))
+                (and (on-table ?x)
+                     (not (exists (?y) (GOAL (on ?x ?y))))
+                     (forall (?z) (imply (GOAL (on-table ?z))
+                                         (on-table ?z))))
+                (exists (?y) (and (on ?x ?y)
+                                  (not (GOAL (on-table ?x)))
+                                  (not (GOAL (clear ?y)))
+                                  (forall (?z) (imply (GOAL (on ?x ?z)) (= ?z ?y)))
+                                  (forall (?z) (imply (GOAL (on ?z ?y)) (= ?z ?x)))
+                                  (goodtowerbelow ?y)))))
+    
+    (:derived (goodtowerabove ?x)
+              (or (clear ?x)
+                  (exists (?y) (and (on ?y ?x)
+                                    (not (GOAL (clear ?x)))
+                                    (not (GOAL (on-table ?y)))
+                                    (forall (?z) (imply (GOAL (on ?z ?x)) (= ?z ?y)))
+                                    (forall (?z) (imply (GOAL (on ?y ?z)) (= ?z ?x)))
+                                    (goodtowerabove ?y))))
+;            (or (and (clear ?x) 
+;                     (GOAL (clear ?x)))
+;                (and (clear ?x)
+;                     (not (exists (?y) (GOAL (on ?y ?x))))
+;                     (forall (?z) (imply (GOAL (clear ?z))
+;                                         (clear ?z))))
+;                (exists (?y) (and (on ?y ?x)
+;                                  (not (GOAL (clear ?x)))
+;                                  (not (GOAL (on-table ?y)))
+;                                  (forall (?z) (imply (GOAL (on ?z ?x)) (= ?z ?y)))
+;                                  (forall (?z) (imply (GOAL (on ?y ?z)) (= ?z ?x)))
+;                                  (goodtowerabove ?y))))
+            )
+  
+  (:derived (goodtower ?x)
+            (and (clear ?x)
+                 (not (GOAL (holding ?x)))
+                 (goodtowerbelow ?x)))
+  
+  (:derived (badtower ?x)
+            (and (clear ?x)
+                 (not (goodtowerbelow ?x))))
+  
+  
+  (:action pickup
+           :parameters (?ob)
+           :precondition (and (clear ?ob) (on-table ?ob) (arm-empty))
+           :effect (and (holding ?ob) (not (clear ?ob)) (not (on-table ?ob)) 
+                        (not (arm-empty))))
+  
+  (:action putdown
+           :parameters  (?ob)
+           :precondition (and (holding ?ob))
+           :effect (and (clear ?ob) (arm-empty) (on-table ?ob) 
+                        (not (holding ?ob))))
+  
+  (:action stack
+           :parameters  (?ob ?underob)
+           ; :precondition (and  (clear ?underob) (holding ?ob) (not (= ?ob ?underob)) )
+           :precondition (and  (clear ?underob) (holding ?ob))
+           ; :precondition (and (goodtower ?underob) (clear ?underob) (holding ?ob))
+           :effect (and (arm-empty) (clear ?ob) (on ?ob ?underob)
+                        (not (clear ?underob)) (not (holding ?ob))))
+  
+  (:action unstack
+           :parameters  (?ob ?underob)
+           ; :precondition (and (on ?ob ?underob) (clear ?ob) (arm-empty))
+           :precondition (and (on ?ob ?underob) (above ?ob ?underob) (clear ?ob) (arm-empty))
+           :effect (and (holding ?ob) (clear ?underob)
+                        (not (on ?ob ?underob)) (not (clear ?ob)) (not (arm-empty))))
+  
+  )
+

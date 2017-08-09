@@ -1,0 +1,1745 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>GUITLPlan</name>
+    </assembly>
+    <members>
+        <member name="T:GUI.OptionChooser">
+            <summary>
+            Represents the main options GUI window of the TLPlan planner.
+            This window allows for choosing different otions and starting the planning.
+            </summary>
+        </member>
+        <member name="F:GUI.OptionChooser.components">
+            <summary>
+            Required designer variable.
+            </summary>
+        </member>
+        <member name="M:GUI.OptionChooser.Dispose(System.Boolean)">
+            <summary>
+            Clean up any resources being used.
+            </summary>
+            <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        </member>
+        <member name="M:GUI.OptionChooser.InitializeComponent">
+            <summary>
+            Required method for Designer support - do not modify
+            the contents of this method with the code editor.
+            </summary>
+        </member>
+        <member name="F:GUI.OptionChooser.m_options">
+            <summary>
+            The options chosen by the user.
+            </summary>
+        </member>
+        <member name="F:GUI.OptionChooser.m_problemCount">
+            <summary>
+            The number of problems that have been started so far.
+            </summary>
+        </member>
+        <member name="M:GUI.OptionChooser.#ctor">
+            <summary>
+            Creates a new option chooser window.
+            </summary>
+        </member>
+        <member name="M:GUI.OptionChooser.SaveUserSettings">
+            <summary>
+            Saves the user's choices in the settings, so that they can be loaded the next time the application is run.
+            </summary>
+        </member>
+        <member name="T:GUI.GUITLPlanOptions">
+            <summary>
+            Represents the GUI version of TLPlan options.
+            </summary>
+            <remarks>
+            All properties have been decorated with different attributes, so that
+            they show up properly in the PropertyGrid control.
+            </remarks>
+        </member>
+        <member name="F:GUI.GUITLPlanOptions.m_graphSearchStrategy">
+            <summary>
+            The graph search strategy.
+            </summary>
+        </member>
+        <member name="F:GUI.GUITLPlanOptions.m_worldType">
+            <summary>
+            The world implementation type.
+            </summary>
+        </member>
+        <member name="F:GUI.GUITLPlanOptions.m_validatePlan">
+            <summary>
+            Whether to validate the plan.
+            </summary>
+        </member>
+        <member name="F:GUI.GUITLPlanOptions.m_allPropertyDescriptors">
+            <summary>
+            A dictionary that maps property names to their corresponding <see cref="T:System.ComponentModel.PropertyDescriptor"/>.
+            </summary>
+        </member>
+        <member name="F:GUI.GUITLPlanOptions.m_readOnlyDescriptors">
+            <summary>
+            A dictionary that maps property names to their corresponding <see cref="T:GUI.GUITLPlanOptions.ReadOnlyPropertyDescriptor"/>.
+            </summary>
+        </member>
+        <member name="F:GUI.GUITLPlanOptions.m_browsableDescriptors">
+            <summary>
+            A dictionary that maps property names to their corresponding <see cref="T:GUI.GUITLPlanOptions.BrowsablePropertyDescriptor"/>.
+            </summary>
+        </member>
+        <member name="M:GUI.GUITLPlanOptions.#ctor">
+            <summary>
+            Creates a new instance of GUI options with default values.
+            </summary>
+        </member>
+        <member name="M:GUI.GUITLPlanOptions.#ctor(TLPlan.TLPlanOptions)">
+            <summary>
+            Creates a new instance of GUI options with the specified values.
+            </summary>
+            <param name="options">The desired options.</param>
+        </member>
+        <member name="M:GUI.GUITLPlanOptions.MakeReadOnly">
+            <summary>
+            Makes all browsables properties read-only.
+            </summary>
+        </member>
+        <member name="M:GUI.GUITLPlanOptions.HideNonTLPlanOptions">
+            <summary>
+            Make all non-TLPlan options non-browsable.
+            </summary>
+        </member>
+        <member name="M:GUI.GUITLPlanOptions.ConvertToTLPlanOptions">
+            <summary>
+            Returns these options' equivalent instance of <see cref="T:TLPlan.TLPlanOptions"/>.
+            </summary>
+            <remarks>
+            This method only works on instances that have no option set to "All".
+            </remarks>
+            <returns>An instance of <see cref="T:TLPlan.TLPlanOptions"/> that has the same options as this object.</returns>
+        </member>
+        <member name="M:GUI.GUITLPlanOptions.GetSelectedGUITLPlanOptions">
+            <summary>
+            Returns an enumeration of all <see cref="T:GUI.GUITLPlanOptions"/> corresponding to this object, with no option set to "All".
+            </summary>
+            <returns>An enumeration of all <see cref="T:GUI.GUITLPlanOptions"/> corresponding to this object, with no option set to "All".</returns>
+        </member>
+        <member name="M:GUI.GUITLPlanOptions.GetSelectedTLPlanOptions">
+            <summary>
+            Returns an enumeration of all <see cref="T:TLPlan.TLPlanOptions"/> corresponding to this object.
+            </summary>
+            <returns>An enumeration of all <see cref="T:TLPlan.TLPlanOptions"/> corresponding to this object.</returns>
+        </member>
+        <member name="M:GUI.GUITLPlanOptions.System#ComponentModel#ICustomTypeDescriptor#GetAttributes">
+            <summary>
+            Returns a collection of custom attributes for this instance of a component.
+            </summary>
+            <returns>An <see cref="T:System.ComponentModel.AttributeCollection"/> containing the attributes for
+            this object.</returns>
+        </member>
+        <member name="M:GUI.GUITLPlanOptions.System#ComponentModel#ICustomTypeDescriptor#GetClassName">
+            <summary>
+            Returns the class name of this instance of a component.
+            </summary>
+            <returns>The class name of the object, or null if the class does not have a name.</returns>
+        </member>
+        <member name="M:GUI.GUITLPlanOptions.System#ComponentModel#ICustomTypeDescriptor#GetComponentName">
+            <summary>
+            Returns the name of this instance of a component.
+            </summary>
+            <returns>The name of the object, or null if the object does not have a name.</returns>
+        </member>
+        <member name="M:GUI.GUITLPlanOptions.System#ComponentModel#ICustomTypeDescriptor#GetConverter">
+            <summary>
+            Returns a type converter for this instance of a component.
+            </summary>
+            <returns>A <see cref="T:System.ComponentModel.TypeConverter"/> that is the converter for this object,
+            or null if there is no <see cref="T:System.ComponentModel.TypeConverter"/> for this object.</returns>
+        </member>
+        <member name="M:GUI.GUITLPlanOptions.System#ComponentModel#ICustomTypeDescriptor#GetDefaultEvent">
+            <summary>
+            Returns the default event for this instance of a component.
+            </summary>
+            <returns>An <see cref="T:System.ComponentModel.EventDescriptor"/> that represents the default event
+            for this object, or null if this object does not have events.</returns>
+        </member>
+        <member name="M:GUI.GUITLPlanOptions.System#ComponentModel#ICustomTypeDescriptor#GetDefaultProperty">
+            <summary>
+            Returns the default property for this instance of a component.
+            </summary>
+            <returns>A <see cref="T:System.ComponentModel.PropertyDescriptor"/> that represents the default property
+            for this object, or null if this object does not have properties.</returns>
+        </member>
+        <member name="M:GUI.GUITLPlanOptions.System#ComponentModel#ICustomTypeDescriptor#GetEditor(System.Type)">
+            <summary>
+            Returns an editor of the specified type for this instance of a component.
+            </summary>
+            <param name="editorBaseType">A <see cref="T:System.Type"/> that represents the editor for this object.</param>
+            <returns>An <see cref="T:System.Object"/> of the specified type that is the editor for this object,
+            or null if the editor cannot be found.</returns>
+        </member>
+        <member name="M:GUI.GUITLPlanOptions.System#ComponentModel#ICustomTypeDescriptor#GetEvents(System.Attribute[])">
+            <summary>
+            Returns the events for this instance of a component using the specified attribute
+            array as a filter.
+            </summary>
+            <param name="attributes">An array of type <see cref="T:System.Attribute"/> that is used as a filter.</param>
+            <returns>An <see cref="T:System.ComponentModel.EventDescriptorCollection"/> that represents the filtered
+            events for this component instance.</returns>
+        </member>
+        <member name="M:GUI.GUITLPlanOptions.System#ComponentModel#ICustomTypeDescriptor#GetEvents">
+            <summary>
+            Returns the events for this instance of a component.
+            </summary>
+            <returns>An <see cref="T:System.ComponentModel.EventDescriptorCollection"/> that represents the events
+            for this component instance.</returns>
+        </member>
+        <member name="M:GUI.GUITLPlanOptions.System#ComponentModel#ICustomTypeDescriptor#GetProperties(System.Attribute[])">
+            <summary>
+            Returns the properties for this instance of a component using the attribute
+            array as a filter.
+            </summary>
+            <param name="attributes">An array of type <see cref="T:System.Attribute"/> that is used as a filter.</param>
+            <returns>A <see cref="T:System.ComponentModel.PropertyDescriptorCollection"/> that represents the
+            filtered properties for this component instance.</returns>
+        </member>
+        <member name="M:GUI.GUITLPlanOptions.System#ComponentModel#ICustomTypeDescriptor#GetProperties">
+            <summary>
+            Returns the properties for this instance of a component.
+            </summary>
+            <returns>A <see cref="T:System.ComponentModel.PropertyDescriptorCollection"/> that represents the
+            properties for this component instance.</returns>
+        </member>
+        <member name="M:GUI.GUITLPlanOptions.System#ComponentModel#ICustomTypeDescriptor#GetPropertyOwner(System.ComponentModel.PropertyDescriptor)">
+            <summary>
+            Returns an object that contains the property described by the specified property
+            descriptor.
+            </summary>
+            <param name="pd">A <see cref="T:System.ComponentModel.PropertyDescriptor"/> that represents the property whose
+            owner is to be found.</param>
+            <returns>An <see cref="T:System.Object"/> that represents the owner of the specified property.</returns>
+        </member>
+        <member name="M:GUI.GUITLPlanOptions.SwitchProperties(System.ComponentModel.PropertyDescriptorCollection)">
+            <summary>
+            Switches the property descriptors in the collection by the ones we modified.
+            </summary>
+            <param name="properties">The collection of property descriptors to modify.</param>
+            <returns>A collection of property descriptors containing the modifiable ones.</returns>
+            <seealso cref="T:System.ComponentModel.PropertyDescriptor"/>
+        </member>
+        <member name="M:GUI.GUITLPlanOptions.InitializePropertyDescriptors">
+            <summary>
+            Initializes all the modifiable property descriptors.
+            </summary>
+        </member>
+        <member name="P:GUI.GUITLPlanOptions.DomainFile">
+            <summary>
+            The domain file to use.
+            </summary>
+        </member>
+        <member name="P:GUI.GUITLPlanOptions.ProblemFile">
+            <summary>
+            The problem file to use.
+            </summary>
+        </member>
+        <member name="P:GUI.GUITLPlanOptions.SearchStrategy">
+            <summary>
+            The graph search strategy to use.
+            </summary>
+        </member>
+        <member name="P:GUI.GUITLPlanOptions.WorldImplementation">
+            <summary>
+            The world implementation to use.
+            </summary>
+        </member>
+        <member name="P:GUI.GUITLPlanOptions.FactsContainerImplementation">
+            <summary>
+            The facts container implementation to use. Note that this is only defined if the world
+            implementation is custom.
+            </summary>
+        </member>
+        <member name="P:GUI.GUITLPlanOptions.FluentsContainerImplementation">
+            <summary>
+            The fluents container implementation to use. Note that this is only defined if the world
+            implementation is custom.
+            </summary>
+        </member>
+        <member name="P:GUI.GUITLPlanOptions.SetStructureImplementation">
+            <summary>
+            The sets implementation. This is used to generate the appropriate
+            implementation for the open and closed set needed in certain search strategies.
+            </summary>
+        </member>
+        <member name="P:GUI.GUITLPlanOptions.ComputeInvariants">
+            <summary>
+            Whether invariants should be computed and stored separately from the each 
+            world generated during the search process.
+            </summary>
+        </member>
+        <member name="P:GUI.GUITLPlanOptions.PreprocessLevel">
+            <summary>
+            The level of preprocessing to complete before starting the actual graph search process.
+            The preprocessing phase is used to simplify actions preconditions.
+            </summary>
+        </member>
+        <member name="P:GUI.GUITLPlanOptions.ImmediatelyPruneSuccessors">
+            <summary>
+            If true, immediately prune successors using the temporal control formula.
+            Else, discard successors only when they are the next ones to be explored.
+            </summary>
+        </member>
+        <member name="P:GUI.GUITLPlanOptions.CycleChecking">
+            <summary>
+            Whether to check for cycles when exploring the graph.
+            If set to false, the search may never return since it may explore cycles 
+            ad vitam eternam.
+            </summary>
+        </member>
+        <member name="P:GUI.GUITLPlanOptions.UseBacktracking">
+            <summary>
+            Whether to use backtracking when exploring the graph.
+            If set to false, all successors of a world, except the first one, are discarded.
+            </summary>
+        </member>
+        <member name="P:GUI.GUITLPlanOptions.ConcurrentActions">
+            <summary>
+            Whether to support concurrency in planning.
+            If set to false, only sequential plans are generated.
+            </summary>
+        </member>
+        <member name="P:GUI.GUITLPlanOptions.AllowUndefinedFluents">
+            <summary>
+            Whether to allow the use of undefined fluents.
+            If set to false, the program throws an exception whenever an undefined fluent is
+            evaluated.
+            </summary>
+        </member>
+        <member name="P:GUI.GUITLPlanOptions.ElideWaitEvent">
+            <summary>
+            Whether to hide the wait-for-next-event in plans.
+            </summary>
+        </member>
+        <member name="P:GUI.GUITLPlanOptions.ValidatePlan">
+            <summary>
+            Whether to validate the plan (using the validator) when one is found.
+            </summary>
+        </member>
+        <member name="P:GUI.GUITLPlanOptions.ValidationDomain">
+            <summary>
+            The PDDL domain used for validation. This domain must be PDDL3.0-compliant
+            (no TLPlan special operators, no object fluents, ...).
+            </summary>
+        </member>
+        <member name="P:GUI.GUITLPlanOptions.SearchLimit">
+            <summary>
+            The maximum number of samples to visit during the search.
+            Set this value to 0 for no limit.
+            </summary>
+        </member>
+        <member name="P:GUI.GUITLPlanOptions.TimeLimit">
+            <summary>
+            The maximum time limit during the search.
+            Set this value to 0 for no limit.
+            </summary>
+        </member>
+        <member name="P:GUI.GUITLPlanOptions.PauseOnInitialWorld">
+            <summary>
+            Whether to pause on the initial world when planning.
+            </summary>
+        </member>
+        <member name="P:GUI.GUITLPlanOptions.PauseOnGoalWorld">
+            <summary>
+            Whether to pause on the goal world when planning.
+            </summary>
+        </member>
+        <member name="P:GUI.GUITLPlanOptions.Count">
+            <summary>
+            Gets the number of <see cref="T:TLPlan.TLPlanOptions"/> instances that will be created from
+            the current options.
+            </summary>
+        </member>
+        <member name="T:GUI.GUITLPlanOptions.TimeLimitConverter">
+            <summary>
+            Represents a type converter for <see cref="T:System.TimeSpan"/> which represent time limits.
+            </summary>
+            <seealso cref="T:System.TimeSpan"/>
+        </member>
+        <member name="M:GUI.GUITLPlanOptions.TimeLimitConverter.CanConvertFrom(System.ComponentModel.ITypeDescriptorContext,System.Type)">
+            <summary>
+            Returns whether this converter can convert an object of the given type to
+            <see cref="T:System.TimeSpan"/>, using the specified context.
+            </summary>
+            <remarks>
+            The only type that can be converted from is <see cref="T:System.String"/>.
+            </remarks>
+            <param name="context">An <see cref="T:System.ComponentModel.ITypeDescriptorContext"/> that provides a format context.</param>
+            <param name="sourceType">A <see cref="T:System.Type"/> that represents the type you want to convert from. The only supported type is <see cref="T:System.String"/>.</param>
+            <returns>True if this converter can perform the conversion; otherwise, false.</returns>
+        </member>
+        <member name="M:GUI.GUITLPlanOptions.TimeLimitConverter.ConvertFrom(System.ComponentModel.ITypeDescriptorContext,System.Globalization.CultureInfo,System.Object)">
+            <summary>
+            Converts the given value to <see cref="T:System.TimeSpan"/>, using the specified
+            context and culture information.
+            </summary>
+            <remarks>The only type that can be converted from is <see cref="T:System.String"/>.</remarks>
+            <param name="context">An <see cref="T:System.ComponentModel.ITypeDescriptorContext"/> that provides a format context.</param>
+            <param name="culture">The <see cref="T:System.Globalization.CultureInfo"/> to use as the current culture.</param>
+            <param name="value">The <see cref="T:System.Object"/> to convert. This has to be of type <see cref="T:System.String"/>.</param>
+            <returns>An <see cref="T:System.Object"/> that represents the converted value. If the conversion worked, it is of type <see cref="T:System.TimeSpan"/>.</returns>
+        </member>
+        <member name="M:GUI.GUITLPlanOptions.TimeLimitConverter.CanConvertTo(System.ComponentModel.ITypeDescriptorContext,System.Type)">
+            <summary>
+            Returns whether this converter can convert the object to <see cref="T:System.TimeSpan"/>,
+            using the specified context.
+            </summary>
+            <param name="context">An <see cref="T:System.ComponentModel.ITypeDescriptorContext"/> that provides a format context.</param>
+            <param name="destinationType">A <see cref="T:System.Type"/> that represents the type you want to convert to. The only conversion available is to <see cref="T:System.String"/>.</param>
+            <returns>True if this converter can perform the conversion; otherwise, false.</returns>
+        </member>
+        <member name="M:GUI.GUITLPlanOptions.TimeLimitConverter.ConvertTo(System.ComponentModel.ITypeDescriptorContext,System.Globalization.CultureInfo,System.Object,System.Type)">
+            <summary>
+            Converts the given value object to <see cref="T:System.TimeSpan"/>, using the specified
+            context and culture information.
+            </summary>
+            <param name="context">An <see cref="T:System.ComponentModel.ITypeDescriptorContext"/> that provides a format context.</param>
+            <param name="culture">The <see cref="T:System.Globalization.CultureInfo"/> to use as the current culture.</param>
+            <param name="value">The <see cref="T:System.Object"/> to convert.</param>
+            <param name="destinationType">The <see cref="T:System.Type"/> to convert the value parameter to. This can only be <see cref="T:System.String"/>.</param>
+            <returns>An <see cref="T:System.Object"/> that represents the converted value.</returns>
+        </member>
+        <member name="T:GUI.GUITLPlanOptions.LocalizableEnumConverter">
+            <summary>
+            Represents an localizable enumeration converter. The localization is done through the use of resources.
+            </summary>
+        </member>
+        <member name="F:GUI.GUITLPlanOptions.LocalizableEnumConverter.m_resourceManager">
+            <summary>
+            The resource manager holding the localized strings for the enumeration values.
+            </summary>
+            <remarks>
+            Localized strings representing enumeration values are stored in resources using a
+            key/value scheme. The key's format is "EnumerationType_EnumerationValue", and the value
+            is the localized string.
+            </remarks>
+            <example>
+            This example illustrates the key formatting. Let's assume we have an enumeration called <code>EnumExample</code>:
+            <code>
+            public enum EnumExample
+            {
+              Value1, 
+              Value2,
+              Value3
+            }
+            </code>>
+            The actual keys used in the resources will be:
+            <code>
+            EnumExample_Value1
+            EnumExample_Value2
+            EnumExample_Value3
+            </code>
+            We could therefore manually extract localized values for the current culture using the following code,
+            assuming resourceManager has been properly set:
+            <code>
+            string localizedValue = resourceManager.GetString("EnumExample_Value2", CultureInfo.CurrentCulture);
+            </code>
+            </example>
+        </member>
+        <member name="F:GUI.GUITLPlanOptions.LocalizableEnumConverter.m_cultureLookups">
+            <summary>
+            A dictionary that maps, for each culture, the localized string representation of an enumeration value to the actual enumeration value.
+            </summary>
+        </member>
+        <member name="M:GUI.GUITLPlanOptions.LocalizableEnumConverter.#ctor(System.Type)">
+            <summary>
+            Creates a new localizable enumeration converter.
+            </summary>
+            <param name="enumType">The <see cref="T:System.Type"/> of enumeration.</param>
+        </member>
+        <member name="M:GUI.GUITLPlanOptions.LocalizableEnumConverter.GetStringValueFromResources(System.Globalization.CultureInfo,System.Object)">
+            <summary>
+            Retrieves the string representation of an enumeration value in the given culture.
+            </summary>
+            <remarks>
+            If no correspondance for the enumeration value is found in the given culture, the enumeration
+            value's string key is returned instead.
+            </remarks>
+            <param name="culture">The <see cref="T:System.Globalization.CultureInfo"/> to use as the current culture.</param>
+            <param name="value">The enumeration value.</param>
+            <returns>The string representation of the enumeration value. If it is not found in the current resources, the string key is returned. See <see cref="T:GUI.GUITLPlanOptions.LocalizableEnumConverter"/>.</returns>
+            <seealso cref="T:GUI.GUITLPlanOptions.LocalizableEnumConverter"/>
+        </member>
+        <member name="M:GUI.GUITLPlanOptions.LocalizableEnumConverter.GetEnumValueFromString(System.Globalization.CultureInfo,System.String)">
+            <summary>
+            Retrieves the enumeration value based on the localized string value.
+            </summary>
+            <param name="culture">The <see cref="T:System.Globalization.CultureInfo"/> to use as the current culture.
+            If this is a <see langword="null"/>, <see cref="P:System.Globalization.CultureInfo.CurrentUICulture"/> is used instead.</param>
+            <param name="value">The localized string value.</param>
+            <returns>The enumeration value, or null if no correspondance was found.</returns>
+        </member>
+        <member name="M:GUI.GUITLPlanOptions.LocalizableEnumConverter.GetCultureLookup(System.Globalization.CultureInfo)">
+            <summary>
+            Retrieves the dictionary that maps localized string values to the actual enumeration value,
+            for a given culture.
+            </summary>
+            <param name="culture">The <see cref="T:System.Globalization.CultureInfo"/> to use as the current culture.
+            If this is a <see langword="null"/>, <see cref="P:System.Globalization.CultureInfo.CurrentUICulture"/> is used instead.</param>
+            <returns>The dictionary that maps localized string values to the actual enumeration value, for the given culture.</returns>
+        </member>
+        <member name="M:GUI.GUITLPlanOptions.LocalizableEnumConverter.ConvertFrom(System.ComponentModel.ITypeDescriptorContext,System.Globalization.CultureInfo,System.Object)">
+            <summary>
+            Converts the specified value object to an enumeration object.
+            </summary>
+            <remarks>The only type that can be converted from is <see cref="T:System.String"/>.</remarks>
+            <param name="context">An <see cref="T:System.ComponentModel.ITypeDescriptorContext"/> that provides a format context.</param>
+            <param name="culture">The <see cref="T:System.Globalization.CultureInfo"/> to use as the current culture.</param>
+            <param name="value">The <see cref="T:System.Object"/> to convert. This has to be of type <see cref="T:System.String"/>.</param>
+            <returns>An <see cref="T:System.Object"/> that represents the converted value.</returns>
+        </member>
+        <member name="M:GUI.GUITLPlanOptions.LocalizableEnumConverter.ConvertTo(System.ComponentModel.ITypeDescriptorContext,System.Globalization.CultureInfo,System.Object,System.Type)">
+            <summary>
+            Converts the given value object to the specified destination type.
+            </summary>
+            <param name="context">An <see cref="T:System.ComponentModel.ITypeDescriptorContext"/> that provides a format context.</param>
+            <param name="culture">The <see cref="T:System.Globalization.CultureInfo"/> to use as the current culture.</param>
+            <param name="value">The <see cref="T:System.Object"/> to convert.</param>
+            <param name="destinationType">The <see cref="T:System.Type"/> to convert the value parameter to. This can only be <see cref="T:System.String"/>.</param>
+            <returns>An <see cref="T:System.Object"/> that represents the converted value.</returns>
+        </member>
+        <member name="T:GUI.GUITLPlanOptions.ReadOnlyFileNameEditor">
+            <summary>
+            Represents a <see cref="T:System.Windows.Forms.Design.FileNameEditor"/> that can be set to read-only
+            and look like it is read-only.
+            </summary>
+            <remarks>
+            This class exists solely to overcome what we view as a problem with the original <see cref="T:System.Windows.Forms.Design.FileNameEditor"/>,
+            since it still looks editable, even when it is read-only.
+            </remarks>
+            <seealso cref="T:System.Windows.Forms.Design.FileNameEditor"/>
+        </member>
+        <member name="M:GUI.GUITLPlanOptions.ReadOnlyFileNameEditor.GetEditStyle(System.ComponentModel.ITypeDescriptorContext)">
+            <summary>
+            Gets the editing style used by the <see cref="M:System.Windows.Forms.Design.FileNameEditor.EditValue(System.ComponentModel.ITypeDescriptorContext,System.IServiceProvider,System.Object)"/>
+            method.
+            </summary>
+            <param name="context">An <see cref="T:System.ComponentModel.ITypeDescriptorContext"/> that can be used to gain
+            additional context information.</param>
+            <returns>If it is read-only, returns <see cref="F:System.Drawing.Design.UITypeEditorEditStyle.None"/>. Otherwise, it returns one
+            of the <see cref="T:System.Drawing.Design.UITypeEditorEditStyle"/> values indicating the provided editing style.</returns>
+        </member>
+        <member name="T:GUI.GUITLPlanOptions.BrowsablePropertyDescriptor">
+            <summary>
+            Represents a <see cref="T:System.ComponentModel.PropertyDescriptor"/> for which the "browsable"
+            attribute can be changed at runtime.
+            </summary>
+        </member>
+        <member name="T:GUI.Reflection.ForwardingPropertyDescriptor">
+            <summary>
+            Represents a <see cref="T:System.ComponentModel.PropertyDescriptor"/> which forwards
+            all methods to an underlying <see cref="T:System.ComponentModel.PropertyDescriptor"/>.
+            This can be used, in subclasses, to allow changing the value of attributes at runtime.
+            </summary>
+            <seealso cref="T:System.ComponentModel.PropertyDescriptor"/>
+        </member>
+        <member name="F:GUI.Reflection.ForwardingPropertyDescriptor.m_root">
+            <summary>
+            The wrapped <see cref="T:System.ComponentModel.PropertyDescriptor"/>.
+            </summary>
+        </member>
+        <member name="M:GUI.Reflection.ForwardingPropertyDescriptor.#ctor(System.ComponentModel.PropertyDescriptor)">
+            <summary>
+            Creates a new property descriptor, wrapping the given one.
+            </summary>
+            <param name="root">The <see cref="T:System.ComponentModel.PropertyDescriptor"/> to wrap and to forward method calls to.</param>
+        </member>
+        <member name="M:GUI.Reflection.ForwardingPropertyDescriptor.AddValueChanged(System.Object,System.EventHandler)">
+            <summary>
+            Enables other objects to be notified when this property changes.
+            </summary>
+            <param name="component">The component to add the handler for.</param>
+            <param name="handler">The delegate to add as a listener.</param>
+        </member>
+        <member name="M:GUI.Reflection.ForwardingPropertyDescriptor.CanResetValue(System.Object)">
+            <summary>
+            When overridden in a derived class, returns whether resetting an object changes
+            its value.
+            </summary>
+            <param name="component">The component to test for reset capability.</param>
+            <returns>True if resetting the component changes its value; otherwise, false.</returns>
+        </member>
+        <member name="M:GUI.Reflection.ForwardingPropertyDescriptor.GetChildProperties(System.Object,System.Attribute[])">
+            <summary>
+            Returns a <see cref="T:System.ComponentModel.PropertyDescriptorCollection"/> for a given
+            object using a specified array of attributes as a filter.
+            </summary>
+            <param name="instance">A component to get the properties for.</param>
+            <param name="filter">An array of type System.Attribute to use as a filter.</param>
+            <returns>A <see cref="T:System.ComponentModel.PropertyDescriptorCollection"/> with the properties
+            that match the specified attributes for the specified component.</returns>
+        </member>
+        <member name="M:GUI.Reflection.ForwardingPropertyDescriptor.GetEditor(System.Type)">
+            <summary>
+            Gets an editor of the specified type.
+            </summary>
+            <param name="editorBaseType">The base type of editor, which is used to differentiate between multiple
+            editors that a property supports.</param>
+            <returns>An instance of the requested editor type, or null if an editor cannot be found.</returns>
+        </member>
+        <member name="M:GUI.Reflection.ForwardingPropertyDescriptor.GetValue(System.Object)">
+            <summary>
+            When overridden in a derived class, gets the current value of the property
+            on a component.
+            </summary>
+            <param name="component">The component with the property for which to retrieve the value.</param>
+            <returns>The value of a property for a given component.</returns>
+        </member>
+        <member name="M:GUI.Reflection.ForwardingPropertyDescriptor.RemoveValueChanged(System.Object,System.EventHandler)">
+            <summary>
+            Disables other objects to be notified when this property changes.
+            </summary>
+            <param name="component">The component to remove the handler for.</param>
+            <param name="handler">The delegate to remove as a listener.</param>
+        </member>
+        <member name="M:GUI.Reflection.ForwardingPropertyDescriptor.ResetValue(System.Object)">
+            <summary>
+            When overridden in a derived class, resets the value for this property of
+            the component to the default value.
+            </summary>
+            <param name="component">The component with the property value that is to be reset to the default
+            value.</param>
+        </member>
+        <member name="M:GUI.Reflection.ForwardingPropertyDescriptor.SetValue(System.Object,System.Object)">
+            <summary>
+            When overridden in a derived class, sets the value of the component to a
+            different value.
+            </summary>
+            <param name="component">The component with the property value that is to be set.</param>
+            <param name="value">The new value.</param>
+        </member>
+        <member name="M:GUI.Reflection.ForwardingPropertyDescriptor.ShouldSerializeValue(System.Object)">
+            <summary>
+            When overridden in a derived class, determines a value indicating whether
+            the value of this property needs to be persisted.
+            </summary>
+            <param name="component">The component with the property to be examined for persistence.</param>
+            <returns>True if the property should be persisted; otherwise, false.</returns>
+        </member>
+        <member name="M:GUI.Reflection.ForwardingPropertyDescriptor.Equals(System.Object)">
+            <summary>
+            Compares this to another object to see if they are equivalent.
+            </summary>
+            <param name="obj">The object to compare to this <see cref="T:GUI.Reflection.ForwardingPropertyDescriptor"/>.</param>
+            <returns>True if the values are equivalent; otherwise, false.</returns>
+        </member>
+        <member name="M:GUI.Reflection.ForwardingPropertyDescriptor.GetHashCode">
+            <summary>
+            Returns the hash code for this object.
+            </summary>
+            <returns>The hash code for this object.</returns>
+        </member>
+        <member name="M:GUI.Reflection.ForwardingPropertyDescriptor.ToString">
+            <summary>
+            Returns a <see cref="T:System.String"/> that represents the current <see cref="T:GUI.Reflection.ForwardingPropertyDescriptor"/>.
+            </summary>
+            <returns>A <see cref="T:System.String"/> that represents the current <see cref="T:GUI.Reflection.ForwardingPropertyDescriptor"/>.</returns>
+        </member>
+        <member name="P:GUI.Reflection.ForwardingPropertyDescriptor.Root">
+            <summary>
+            Gets the wrapped <see cref="T:System.ComponentModel.PropertyDescriptor"/>.
+            </summary>
+        </member>
+        <member name="P:GUI.Reflection.ForwardingPropertyDescriptor.Attributes">
+            <summary>
+            Gets the collection of attributes for this member.
+            </summary>
+        </member>
+        <member name="P:GUI.Reflection.ForwardingPropertyDescriptor.Category">
+            <summary>
+            Gets the name of the category to which the member belongs, as specified in
+            the <see cref="T:System.ComponentModel.CategoryAttribute"/>.
+            </summary>
+        </member>
+        <member name="P:GUI.Reflection.ForwardingPropertyDescriptor.ComponentType">
+            <summary>
+            When overridden in a derived class, gets the type of the component this property
+            is bound to.
+            </summary>
+        </member>
+        <member name="P:GUI.Reflection.ForwardingPropertyDescriptor.Converter">
+            <summary>
+            Gets the type converter for this property.
+            </summary>
+        </member>
+        <member name="P:GUI.Reflection.ForwardingPropertyDescriptor.Description">
+            <summary>
+            Gets the description of the member, as specified in the <see cref="T:System.ComponentModel.DescriptionAttribute"/>.
+            </summary>
+        </member>
+        <member name="P:GUI.Reflection.ForwardingPropertyDescriptor.DesignTimeOnly">
+            <summary>
+            Gets whether this member should be set only at design time, as specified
+            in the <see cref="T:System.ComponentModel.DesignOnlyAttribute"/>.
+            </summary>
+        </member>
+        <member name="P:GUI.Reflection.ForwardingPropertyDescriptor.DisplayName">
+            <summary>
+            Gets the name that can be displayed in a window, such as a Properties window.
+            </summary>
+        </member>
+        <member name="P:GUI.Reflection.ForwardingPropertyDescriptor.IsBrowsable">
+            <summary>
+            Gets a value indicating whether the member is browsable, as specified in
+            the <see cref="T:System.ComponentModel.BrowsableAttribute"/>.
+            </summary>
+        </member>
+        <member name="P:GUI.Reflection.ForwardingPropertyDescriptor.IsLocalizable">
+            <summary>
+            Gets a value indicating whether this property should be localized, as specified
+            in the <see cref="T:System.ComponentModel.LocalizableAttribute"/>.
+            </summary>
+        </member>
+        <member name="P:GUI.Reflection.ForwardingPropertyDescriptor.IsReadOnly">
+            <summary>
+            When overridden in a derived class, gets a value indicating whether this
+            property is read-only.
+            </summary>
+        </member>
+        <member name="P:GUI.Reflection.ForwardingPropertyDescriptor.Name">
+            <summary>
+            Gets the name of the member.
+            </summary>
+        </member>
+        <member name="P:GUI.Reflection.ForwardingPropertyDescriptor.PropertyType">
+            <summary>
+            When overridden in a derived class, gets the type of the property.
+            </summary>
+        </member>
+        <member name="P:GUI.Reflection.ForwardingPropertyDescriptor.SupportsChangeEvents">
+            <summary>
+            Gets a value indicating whether value change notifications for this property
+            may originate from outside the property descriptor.
+            </summary>
+        </member>
+        <member name="F:GUI.GUITLPlanOptions.BrowsablePropertyDescriptor.m_isBrowsable">
+            <summary>
+            Whether the property is browsable.
+            </summary>
+        </member>
+        <member name="M:GUI.GUITLPlanOptions.BrowsablePropertyDescriptor.#ctor(System.ComponentModel.PropertyDescriptor)">
+            <summary>
+            Creates a new property descriptor, wrapping the given one.
+            </summary>
+            <param name="root">The <see cref="T:System.ComponentModel.PropertyDescriptor"/> to wrap and to forward method calls to.</param>
+        </member>
+        <member name="M:GUI.GUITLPlanOptions.BrowsablePropertyDescriptor.SetIsBrowsable(System.Boolean)">
+            <summary>
+            Sets whether the property is browsable.
+            </summary>
+            <param name="isBrowsable">Whether the property is browsable.</param>
+        </member>
+        <member name="P:GUI.GUITLPlanOptions.BrowsablePropertyDescriptor.IsBrowsable">
+            <summary>
+            Gets whether the property is browsable.
+            </summary>
+        </member>
+        <member name="P:GUI.GUITLPlanOptions.BrowsablePropertyDescriptor.Attributes">
+            <summary>
+            Gets the collection of attributes for this member.
+            </summary>
+            <remarks>
+            This replaces the <see cref="T:System.ComponentModel.BrowsableAttribute"/>, if any,
+            with a new one to represent its chosen value.
+            </remarks>
+        </member>
+        <member name="T:GUI.GUITLPlanOptions.ReadOnlyPropertyDescriptor">
+            <summary>
+            Represents a <see cref="T:System.ComponentModel.PropertyDescriptor"/> for which the "readonly"
+            attribute can be changed at runtime.
+            </summary>
+        </member>
+        <member name="F:GUI.GUITLPlanOptions.ReadOnlyPropertyDescriptor.m_readOnly">
+            <summary>
+            Whether the property is read-only.
+            </summary>
+        </member>
+        <member name="M:GUI.GUITLPlanOptions.ReadOnlyPropertyDescriptor.#ctor(System.ComponentModel.PropertyDescriptor)">
+            <summary>
+            Creates a new property descriptor, wrapping the given one.
+            </summary>
+            <param name="root">The <see cref="T:System.ComponentModel.PropertyDescriptor"/> to wrap and to forward method calls to.</param>
+        </member>
+        <member name="M:GUI.GUITLPlanOptions.ReadOnlyPropertyDescriptor.SetReadOnly(System.Boolean)">
+            <summary>
+            Sets whether the property is read-only.
+            </summary>
+            <param name="readOnly">Whether the property is read-only.</param>
+        </member>
+        <member name="P:GUI.GUITLPlanOptions.ReadOnlyPropertyDescriptor.IsReadOnly">
+            <summary>
+            Gets whether the property is read-only.
+            </summary>
+        </member>
+        <member name="P:GUI.GUITLPlanOptions.ReadOnlyPropertyDescriptor.Attributes">
+            <summary>
+            Gets the collection of attributes for this member.
+            </summary>
+            <remarks>
+            This replaces the <see cref="T:System.ComponentModel.ReadOnlyAttribute"/>, if any,
+            with a new one to represent its chosen value.
+            </remarks>
+        </member>
+        <member name="T:GUI.GUITLPlanOptions.BoolOrAll">
+            <summary>
+            A boolean value.
+            </summary>
+            <remarks>The <see cref="F:GUI.GUITLPlanOptions.BoolOrAll.All"/> value means all the enumeration values will
+            be used, each with a different planner.</remarks>
+        </member>
+        <member name="F:GUI.GUITLPlanOptions.BoolOrAll.True">
+            <summary>
+            The true value.
+            </summary>
+        </member>
+        <member name="F:GUI.GUITLPlanOptions.BoolOrAll.False">
+            <summary>
+            The false value.
+            </summary>
+        </member>
+        <member name="F:GUI.GUITLPlanOptions.BoolOrAll.All">
+            <summary>
+            Use all values.
+            </summary>
+        </member>
+        <member name="T:GUI.GUITLPlanOptions.WorldTypeOrAll">
+            <summary>
+            All possible world types.
+            </summary>
+            <remarks>The <see cref="F:GUI.GUITLPlanOptions.WorldTypeOrAll.All"/> value means all the enumeration values will
+            be used, each with a different planner.</remarks>
+        </member>
+        <member name="F:GUI.GUITLPlanOptions.WorldTypeOrAll.Qualified">
+            <summary>
+            A qualified world uses a hashset of qualified predicates and fluents.
+            </summary>
+        </member>
+        <member name="F:GUI.GUITLPlanOptions.WorldTypeOrAll.Custom">
+            <summary>
+            A custom world may be initialized with any combination of facts/fluents container.
+            </summary>
+        </member>
+        <member name="F:GUI.GUITLPlanOptions.WorldTypeOrAll.All">
+            <summary>
+            Use all values.
+            </summary>
+        </member>
+        <member name="T:GUI.GUITLPlanOptions.FactsContainerTypeOrAll">
+            <summary>
+            All possible facts container types. Note that the facts container type is 
+            defined only if the world type is Custom.
+            </summary>
+            <remarks>The <see cref="F:GUI.GUITLPlanOptions.FactsContainerTypeOrAll.All"/> value means all the enumeration values will
+            be used, each with a different planner.</remarks>
+        </member>
+        <member name="F:GUI.GUITLPlanOptions.FactsContainerTypeOrAll.Bitset">
+            <summary>
+            A bitset facts container stores predicates in a fixed bitset.
+            </summary>
+        </member>
+        <member name="F:GUI.GUITLPlanOptions.FactsContainerTypeOrAll.Hashset">
+            <summary>
+            A hashset facts container stores predicates in a hashset.
+            </summary>
+        </member>
+        <member name="F:GUI.GUITLPlanOptions.FactsContainerTypeOrAll.Treeset">
+            <summary>
+            A treeset facts container stores predicates in a treeset.
+            </summary>
+        </member>
+        <member name="F:GUI.GUITLPlanOptions.FactsContainerTypeOrAll.All">
+            <summary>
+            Use all values.
+            </summary>
+        </member>
+        <member name="T:GUI.GUITLPlanOptions.FluentsContainerTypeOrAll">
+            <summary>
+            All possible fluents container types. Note that the fluents container type is
+            defined only if the world type is Custom.
+            </summary>
+            <remarks>The <see cref="F:GUI.GUITLPlanOptions.FluentsContainerTypeOrAll.All"/> value means all the enumeration values will
+            be used, each with a different planner.</remarks>
+        </member>
+        <member name="F:GUI.GUITLPlanOptions.FluentsContainerTypeOrAll.Array">
+            <summary>
+            An array fluents container stores fluents in a fixed array.
+            </summary>
+        </member>
+        <member name="F:GUI.GUITLPlanOptions.FluentsContainerTypeOrAll.Hashmap">
+            <summary>
+            A hashmap fluents container stores fluents in a hashmap.
+            </summary>
+        </member>
+        <member name="F:GUI.GUITLPlanOptions.FluentsContainerTypeOrAll.Treemap">
+            <summary>
+            A treemap fluents container stores fluents in a treemap.
+            </summary>
+        </member>
+        <member name="F:GUI.GUITLPlanOptions.FluentsContainerTypeOrAll.All">
+            <summary>
+            Use all values.
+            </summary>
+        </member>
+        <member name="T:GUI.GUITLPlanOptions.SetImplementationTypeOrAll">
+            <summary>
+            All possible sets implementation type. This is used to generate the appropriate
+            implementation for the open and closed set needed in certain search strategies.
+            </summary>
+            <remarks>The <see cref="F:GUI.GUITLPlanOptions.SetImplementationTypeOrAll.All"/> value means all the enumeration values will
+            be used, each with a different planner.</remarks>
+        </member>
+        <member name="F:GUI.GUITLPlanOptions.SetImplementationTypeOrAll.Hashset">
+            <summary>
+            Generates hashsets, whose elements are not sorted.
+            </summary>
+        </member>
+        <member name="F:GUI.GUITLPlanOptions.SetImplementationTypeOrAll.Treeset">
+            <summary>
+            Generates treesets, whose elements are sorted.
+            </summary>
+        </member>
+        <member name="F:GUI.GUITLPlanOptions.SetImplementationTypeOrAll.All">
+            <summary>
+            Use all values.
+            </summary>
+        </member>
+        <member name="T:GUI.GUITLPlanOptions.GraphSearchStrategyOrAll">
+            <summary>
+            All possible graph search strategies.
+            </summary>
+            <remarks>The <see cref="F:GUI.GUITLPlanOptions.GraphSearchStrategyOrAll.All"/> value means all the enumeration values will
+            be used, each with a different planner.</remarks>
+        </member>
+        <member name="F:GUI.GUITLPlanOptions.GraphSearchStrategyOrAll.BestFirst">
+            <summary>
+            Explores the most promising worlds first.
+            </summary>
+        </member>
+        <member name="F:GUI.GUITLPlanOptions.GraphSearchStrategyOrAll.BreadthFirst">
+            <summary>
+            Explores all neighborhing nodes first.
+            </summary>
+        </member>
+        <member name="F:GUI.GUITLPlanOptions.GraphSearchStrategyOrAll.BreadthFirstPriority">
+            <summary>
+            Explores all neighborhing nodes first, try the actions with the highest priority first.
+            </summary>
+        </member>
+        <member name="F:GUI.GUITLPlanOptions.GraphSearchStrategyOrAll.DepthFirst">
+            <summary>
+            Explores as far as possible along each branch before backtracking.
+            </summary>
+        </member>
+        <member name="F:GUI.GUITLPlanOptions.GraphSearchStrategyOrAll.DepthFirstPriority">
+            <summary>
+            Explores as far as possible along each branch before backtracking, 
+            try the actions with the highest priority first.
+            </summary>
+        </member>
+        <member name="F:GUI.GUITLPlanOptions.GraphSearchStrategyOrAll.DepthFirstNoBacktracking">
+            <summary>
+            Explores as far as possible along a single branch. The search fails if a node
+            has no valid successors.
+            </summary>
+        </member>
+        <member name="F:GUI.GUITLPlanOptions.GraphSearchStrategyOrAll.DepthBestFirst">
+            <summary>
+            Explores as far as possible along each branch before backtracking,
+            try the most promising worlds first.
+            </summary>
+        </member>
+        <member name="F:GUI.GUITLPlanOptions.GraphSearchStrategyOrAll.All">
+            <summary>
+            Use all values.
+            </summary>
+        </member>
+        <member name="T:GUI.GUITLPlanOptions.PreprocessingLevelOrAll">
+            <summary>
+            All possible levels of preprocessing. The preprocessing phase takes place before the
+            actual graph search process and uses the invariants to simplify actions preconditions.
+            </summary>
+            <remarks>The <see cref="F:GUI.GUITLPlanOptions.PreprocessingLevelOrAll.All"/> value means all the enumeration values will
+            be used, each with a different planner.</remarks>
+        </member>
+        <member name="F:GUI.GUITLPlanOptions.PreprocessingLevelOrAll.NoPreprocessing">
+            <summary>
+            Do not preprocess preconditions.
+            </summary>
+        </member>
+        <member name="F:GUI.GUITLPlanOptions.PreprocessingLevelOrAll.PreprocessPreconditions">
+            <summary>
+            Preprocess all preconditions except the defined formulas.
+            </summary>
+        </member>
+        <member name="F:GUI.GUITLPlanOptions.PreprocessingLevelOrAll.PreprocessPreconditionsAndDefinedFormulas">
+            <summary>
+            Preprocess all preconditions.
+            </summary>
+        </member>
+        <member name="F:GUI.GUITLPlanOptions.PreprocessingLevelOrAll.All">
+            <summary>
+            Use all values.
+            </summary>
+        </member>
+        <member name="T:GUI.Properties.Resources">
+            <summary>
+              A strongly-typed resource class, for looking up localized strings, etc.
+            </summary>
+        </member>
+        <member name="P:GUI.Properties.Resources.ResourceManager">
+            <summary>
+              Returns the cached ResourceManager instance used by this class.
+            </summary>
+        </member>
+        <member name="P:GUI.Properties.Resources.Culture">
+            <summary>
+              Overrides the current thread's CurrentUICulture property for all
+              resource lookups using this strongly typed resource class.
+            </summary>
+        </member>
+        <member name="P:GUI.Properties.Resources.BoolOrAll_All">
+            <summary>
+              Looks up a localized string similar to All.
+            </summary>
+        </member>
+        <member name="P:GUI.Properties.Resources.BoolOrAll_False">
+            <summary>
+              Looks up a localized string similar to False.
+            </summary>
+        </member>
+        <member name="P:GUI.Properties.Resources.BoolOrAll_True">
+            <summary>
+              Looks up a localized string similar to True.
+            </summary>
+        </member>
+        <member name="P:GUI.Properties.Resources.FactsContainerTypeOrAll_All">
+            <summary>
+              Looks up a localized string similar to All.
+            </summary>
+        </member>
+        <member name="P:GUI.Properties.Resources.FactsContainerTypeOrAll_Bitset">
+            <summary>
+              Looks up a localized string similar to Bitset of predicates.
+            </summary>
+        </member>
+        <member name="P:GUI.Properties.Resources.FactsContainerTypeOrAll_Hashset">
+            <summary>
+              Looks up a localized string similar to Hashset of literal IDs.
+            </summary>
+        </member>
+        <member name="P:GUI.Properties.Resources.FactsContainerTypeOrAll_Treeset">
+            <summary>
+              Looks up a localized string similar to Treeset of literal IDs.
+            </summary>
+        </member>
+        <member name="P:GUI.Properties.Resources.FluentsContainerTypeOrAll_All">
+            <summary>
+              Looks up a localized string similar to All.
+            </summary>
+        </member>
+        <member name="P:GUI.Properties.Resources.FluentsContainerTypeOrAll_Array">
+            <summary>
+              Looks up a localized string similar to Array of fluents.
+            </summary>
+        </member>
+        <member name="P:GUI.Properties.Resources.FluentsContainerTypeOrAll_Hashmap">
+            <summary>
+              Looks up a localized string similar to Hashmap of fluent IDs.
+            </summary>
+        </member>
+        <member name="P:GUI.Properties.Resources.FluentsContainerTypeOrAll_Treemap">
+            <summary>
+              Looks up a localized string similar to Treemap of fluent IDs.
+            </summary>
+        </member>
+        <member name="P:GUI.Properties.Resources.GraphSearchStrategyOrAll_All">
+            <summary>
+              Looks up a localized string similar to All.
+            </summary>
+        </member>
+        <member name="P:GUI.Properties.Resources.GraphSearchStrategyOrAll_BestFirst">
+            <summary>
+              Looks up a localized string similar to Best first search.
+            </summary>
+        </member>
+        <member name="P:GUI.Properties.Resources.GraphSearchStrategyOrAll_BreadthFirst">
+            <summary>
+              Looks up a localized string similar to Breadth first search.
+            </summary>
+        </member>
+        <member name="P:GUI.Properties.Resources.GraphSearchStrategyOrAll_BreadthFirstPriority">
+            <summary>
+              Looks up a localized string similar to Breadth first priority search.
+            </summary>
+        </member>
+        <member name="P:GUI.Properties.Resources.GraphSearchStrategyOrAll_DepthBestFirst">
+            <summary>
+              Looks up a localized string similar to Depth best first search.
+            </summary>
+        </member>
+        <member name="P:GUI.Properties.Resources.GraphSearchStrategyOrAll_DepthFirst">
+            <summary>
+              Looks up a localized string similar to Depth first search.
+            </summary>
+        </member>
+        <member name="P:GUI.Properties.Resources.GraphSearchStrategyOrAll_DepthFirstNoBacktracking">
+            <summary>
+              Looks up a localized string similar to Depth first search without backtracking.
+            </summary>
+        </member>
+        <member name="P:GUI.Properties.Resources.GraphSearchStrategyOrAll_DepthFirstPriority">
+            <summary>
+              Looks up a localized string similar to Depth first priority search.
+            </summary>
+        </member>
+        <member name="P:GUI.Properties.Resources.PreprocessingLevelOrAll_All">
+            <summary>
+              Looks up a localized string similar to All.
+            </summary>
+        </member>
+        <member name="P:GUI.Properties.Resources.PreprocessingLevelOrAll_NoPreprocessing">
+            <summary>
+              Looks up a localized string similar to No preprocessing.
+            </summary>
+        </member>
+        <member name="P:GUI.Properties.Resources.PreprocessingLevelOrAll_PreprocessPreconditions">
+            <summary>
+              Looks up a localized string similar to Preprocess preconditions only.
+            </summary>
+        </member>
+        <member name="P:GUI.Properties.Resources.PreprocessingLevelOrAll_PreprocessPreconditionsAndDefinedFormulas">
+            <summary>
+              Looks up a localized string similar to Preprocess preconditions and defined formulas.
+            </summary>
+        </member>
+        <member name="P:GUI.Properties.Resources.SetImplementationTypeOrAll_All">
+            <summary>
+              Looks up a localized string similar to All.
+            </summary>
+        </member>
+        <member name="P:GUI.Properties.Resources.SetImplementationTypeOrAll_Hashset">
+            <summary>
+              Looks up a localized string similar to Hashset (uses hash codes).
+            </summary>
+        </member>
+        <member name="P:GUI.Properties.Resources.SetImplementationTypeOrAll_Treeset">
+            <summary>
+              Looks up a localized string similar to Treeset (uses IComparable).
+            </summary>
+        </member>
+        <member name="P:GUI.Properties.Resources.WorldTypeOrAll_All">
+            <summary>
+              Looks up a localized string similar to All.
+            </summary>
+        </member>
+        <member name="P:GUI.Properties.Resources.WorldTypeOrAll_Custom">
+            <summary>
+              Looks up a localized string similar to Custom world implementation.
+            </summary>
+        </member>
+        <member name="P:GUI.Properties.Resources.WorldTypeOrAll_Qualified">
+            <summary>
+              Looks up a localized string similar to Hashset of IDs.
+            </summary>
+        </member>
+        <member name="T:GUI.ViewerForm">
+            <summary>
+            Represents a planning GUI window for the TLPlan planner. It displays parsing and planning
+            information, and allows limited queries on worlds.
+            </summary>
+        </member>
+        <member name="F:GUI.ViewerForm.m_asyncPlanner">
+            <summary>
+            The asynchronous wrapper around the planner.
+            </summary>
+        </member>
+        <member name="F:GUI.ViewerForm.m_lastPlan">
+            <summary>
+            The last plan found.
+            </summary>
+        </member>
+        <member name="F:GUI.ViewerForm.m_parseAndSolve">
+            <summary>
+            Whether to parse and then immediately solve.
+            </summary>
+        </member>
+        <member name="F:GUI.ViewerForm.m_restart">
+            <summary>
+            Whether to restart upon stopping.
+            </summary>
+        </member>
+        <member name="F:GUI.ViewerForm.m_infoWriter">
+            <summary>
+            The writer to which normal, informative messages are written.
+            </summary>
+        </member>
+        <member name="F:GUI.ViewerForm.m_warningWriter">
+            <summary>
+            The writer to which warning or important messages are written.
+            </summary>
+        </member>
+        <member name="F:GUI.ViewerForm.m_errorWriter">
+            <summary>
+            The writer to which errors are written.
+            </summary>
+        </member>
+        <member name="M:GUI.ViewerForm.#ctor(TLPlan.TLPlanOptions)">
+            <summary>
+            Creates a new viewer form with the given TLPlan options.
+            </summary>
+            <param name="options">The TLPlan options to use.</param>
+        </member>
+        <member name="M:GUI.ViewerForm.#ctor(GUI.GUITLPlanOptions)">
+            <summary>
+            Creates a new viewer form with the given GUI TLPlan options.
+            </summary>
+            <param name="guiOptions">The GUI TLPlan options to use.</param>
+        </member>
+        <member name="M:GUI.ViewerForm.PrintStateMessage(GUI.AsyncPlannerWrapper.State)">
+            <summary>
+            Prints a message describing the given state of the asynchronous planner.
+            </summary>
+            <param name="state">The state to describe.</param>
+        </member>
+        <member name="M:GUI.ViewerForm.Start">
+            <summary>
+            Parses and solves the domain and problem specified in the planner's options.
+            </summary>
+            <remarks>
+            This should only be called right after the form has been created; after that,
+            the user will want full control over what is happening...
+            </remarks>
+        </member>
+        <member name="M:GUI.ViewerForm.UpdateStatistics">
+            <summary>
+            Updates the statistics in the status bar.
+            </summary>
+        </member>
+        <member name="M:GUI.ViewerForm.UpdateControls(GUI.AsyncPlannerWrapper.State)">
+            <summary>
+            Updates the form's controls so that they are appropriately enabled or disabled,
+            depending on the given asynchronous planner's state.
+            </summary>
+            <param name="state">The asynchronous planner's state.</param>
+        </member>
+        <member name="M:GUI.ViewerForm.PrintError(System.String)">
+            <summary>
+            Prints an error to the main text box.
+            </summary>
+            <param name="s">The error to print.</param>
+        </member>
+        <member name="M:GUI.ViewerForm.PrintWarning(System.String)">
+            <summary>
+            Prints a warning to the main text box.
+            </summary>
+            <param name="s">The warning to print.</param>
+        </member>
+        <member name="M:GUI.ViewerForm.PrintInfo(System.String)">
+            <summary>
+            Print a normal, informative string to the main text box.
+            </summary>
+            <param name="s">The string to print.</param>
+        </member>
+        <member name="M:GUI.ViewerForm.PrintCommand(System.String)">
+            <summary>
+            Prints a command or a command result to the main text box.
+            </summary>
+            <param name="s">The string to print.</param>
+        </member>
+        <member name="M:GUI.ViewerForm.PrintWorld(System.Boolean)">
+            <summary>
+            Prints the current world to the main text box.
+            </summary>
+            <remarks>This assumes a paused planner state.</remarks>
+            <param name="printAllPredicates">Whether to show all predicates, or only true and defined ones.</param>
+        </member>
+        <member name="F:GUI.ViewerForm.components">
+            <summary>
+            Required designer variable.
+            </summary>
+        </member>
+        <member name="M:GUI.ViewerForm.Dispose(System.Boolean)">
+            <summary>
+            Clean up any resources being used.
+            </summary>
+            <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        </member>
+        <member name="M:GUI.ViewerForm.InitializeComponent">
+            <summary>
+            Required method for Designer support - do not modify
+            the contents of this method with the code editor.
+            </summary>
+        </member>
+        <member name="T:GUI.ViewerForm.EventWriter">
+            <summary>
+            Represents a <see cref="T:System.IO.TextWriter"/> which processes the text written to it
+            using an <see cref="T:System.Action"/> delegate.
+            </summary>
+        </member>
+        <member name="F:GUI.ViewerForm.EventWriter.m_writeString">
+            <summary>
+            The <see cref="T:System.Action"/> delegate used to process all text written to this object.
+            </summary>
+        </member>
+        <member name="M:GUI.ViewerForm.EventWriter.#ctor(System.Action{System.String})">
+            <summary>
+            Creates a new event writer with a given delegate.
+            </summary>
+            <param name="writeStringAction">The delegate which will process the text written to this object.</param>
+        </member>
+        <member name="M:GUI.ViewerForm.EventWriter.Write(System.String)">
+            <summary>
+            Writes a string to the text stream. This string is processed using this object <see cref="T:System.Action"/> delegate.
+            </summary>
+            <param name="value">The string to write.</param>
+        </member>
+        <member name="M:GUI.ViewerForm.EventWriter.Write(System.Char)">
+            <summary>
+            Writes a character to the text stream.
+            This character is processed using this object <see cref="T:System.Action"/> delegate.
+            </summary>
+            <param name="value">The character to write to the text stream.</param>
+        </member>
+        <member name="M:GUI.ViewerForm.EventWriter.Write(System.Char[],System.Int32,System.Int32)">
+            <summary>
+            Writes a subarray of characters to the text stream.
+            This subarray of characters is processed using this object <see cref="T:System.Action"/> delegate.
+            </summary>
+            <param name="buffer">The character array to write data from.</param>
+            <param name="index">Starting index in the buffer.</param>
+            <param name="count">The number of characters to write.</param>
+        </member>
+        <member name="P:GUI.ViewerForm.EventWriter.Encoding">
+            <summary>
+            Returns <see cref="P:System.Text.Encoding.Default"/>.
+            </summary>
+        </member>
+        <member name="T:GUI.AsyncPlannerWrapper">
+            <summary>
+            Represents an asynchronous wrapper over the TLPlan planner that uses threads to parse and solve problems.
+            </summary>
+        </member>
+        <member name="F:GUI.AsyncPlannerWrapper.m_workerThread">
+            <summary>
+            The worker thread used to parse and solve problems.
+            </summary>
+            <remarks>
+            For now, a new thread is created for each operation. Therefore, parsing and planning use two threads consecutively.
+            This member may be null, for example, when the planning is aborted. If it is not null, it is still doing some work
+            (either parsing or solving).
+            </remarks>
+        </member>
+        <member name="F:GUI.AsyncPlannerWrapper.m_stepOnce">
+            <summary>
+            Whether to examine only one world at a time.
+            </summary>
+        </member>
+        <member name="M:GUI.AsyncPlannerWrapper.#ctor(PDDLParser.Parser.Parser,TLPlan.Planner)">
+            <summary>
+            Creates a new asynchronous wrapper for the given planner.
+            </summary>
+            <param name="parser">The parser used to parse domains and problems.</param>
+            <param name="planner">The planner to wrap.</param>
+        </member>
+        <member name="M:GUI.AsyncPlannerWrapper.Finalize">
+            <summary>
+            Disposes of the running thread, if any.
+            </summary>
+        </member>
+        <member name="M:GUI.AsyncPlannerWrapper.AsynchronousParse">
+            <summary>
+            Asynchronously parses the domain and problem found in the planner's options.
+            </summary>
+            <remarks>
+            This assumes a stopped state.
+            </remarks>
+        </member>
+        <member name="M:GUI.AsyncPlannerWrapper.AsynchronousSolve">
+            <summary>
+            Asynchronously solves the parsed problem.
+            </summary>
+            <remarks>
+            <para>This assumes a parsed and stopped state.</para>
+            <para>Also, this might only step to the first (inital) world, depending on the current options.</para>
+            </remarks>
+        </member>
+        <member name="M:GUI.AsyncPlannerWrapper.AsynchronousStep">
+            <summary>
+            Asynchronously steps to the next world in the current planning.
+            </summary>
+            <remarks>
+            This assumes a paused state, or a parsed and stopped state.
+            </remarks>
+        </member>
+        <member name="M:GUI.AsyncPlannerWrapper.AsynchronousPause">
+            <summary>
+            Asynchronously pauses the current planning session.
+            </summary>
+            <remarks>
+            This assumes a running state.
+            </remarks>
+        </member>
+        <member name="M:GUI.AsyncPlannerWrapper.AsynchronousUnpause">
+            <summary>
+            Asynchronously resumes the current planning session.
+            </summary>
+            <remarks>
+            This assumes a paused state.
+            </remarks>
+        </member>
+        <member name="M:GUI.AsyncPlannerWrapper.AsynchronousStop">
+            <summary>
+            Asynchronously stops a planning session.
+            </summary>
+            <remarks>
+            This assumes a running state.
+            </remarks>
+        </member>
+        <member name="M:GUI.AsyncPlannerWrapper.AsynchronousValidate(TLPlan.Plan)">
+            <summary>
+            Asynchronously validates the given plan.
+            </summary>
+            <param name="plan">The plan to validate.</param>
+            <remarks>This assumes a solved state.</remarks>
+        </member>
+        <member name="M:GUI.AsyncPlannerWrapper.Dispose(System.Boolean)">
+            <summary>
+            Disposes of the worker thread, if it is still running.
+            </summary>
+            <param name="inDestructor">Whether this is called from the destructor.</param>
+        </member>
+        <member name="M:GUI.AsyncPlannerWrapper.Planner_PlanningFinished(System.Object,TLPlan.Planner.PlanningFinishedEventArgs)">
+            <summary>
+            Handles the <see cref="E:TLPlan.Planner.PlanningFinished"/> event by forwarding the event.
+            </summary>
+            <param name="sender">The planner.</param>
+            <param name="e">The event's argument.</param>
+        </member>
+        <member name="M:GUI.AsyncPlannerWrapper.Planner_Stopped(System.Object,System.EventArgs)">
+            <summary>
+            Handles tje <see cref="E:TLPlan.Planner.Stopped"/> event by forwarding the event.
+            </summary>
+            <param name="sender">The planner.</param>
+            <param name="e">The event's argument.</param>
+        </member>
+        <member name="M:GUI.AsyncPlannerWrapper.Planner_Started(System.Object,System.EventArgs)">
+            <summary>
+            Handles the <see cref="E:TLPlan.Planner.Started"/> event. This currently does nothing.
+            </summary>
+            <param name="sender">The planner.</param>
+            <param name="e">The event's argument.</param>
+        </member>
+        <member name="M:GUI.AsyncPlannerWrapper.Planner_Unpaused(System.Object,System.EventArgs)">
+            <summary>
+            Handles the <see cref="E:TLPlan.Planner.Unpaused"/> event by forwarding the event.
+            </summary>
+            <remarks>This also handles the stepping logic.</remarks>
+            <param name="sender">The planner.</param>
+            <param name="e">The event's argument.</param>
+        </member>
+        <member name="M:GUI.AsyncPlannerWrapper.Planner_Paused(System.Object,System.EventArgs)">
+            <summary>
+            Handles the <see cref="E:TLPlan.Planner.Paused"/> event by forwarding the event.
+            </summary>
+            <param name="sender">The planner.</param>
+            <param name="e">The event's argument.</param>
+        </member>
+        <member name="M:GUI.AsyncPlannerWrapper.FireStateChanged(GUI.AsyncPlannerWrapper.State)">
+            <summary>
+            Fires the <see cref="E:GUI.AsyncPlannerWrapper.StateChanged"/> event.
+            </summary>
+            <remarks>
+            This also performs the change from the old state to the new one.
+            </remarks>
+            <param name="newState">The new state.</param>
+        </member>
+        <member name="M:GUI.AsyncPlannerWrapper.FireParsed(System.Boolean)">
+            <summary>
+            Fire the <see cref="E:GUI.AsyncPlannerWrapper.Parsed"/> event.
+            </summary>
+            <param name="success">Whether parsing was successful.</param>
+        </member>
+        <member name="M:GUI.AsyncPlannerWrapper.FirePlanFound(TLPlan.Plan)">
+            <summary>
+            Fires the <see cref="E:GUI.AsyncPlannerWrapper.PlanFound"/> event.
+            </summary>
+            <param name="plan">The plan which was found.</param>
+        </member>
+        <member name="M:GUI.AsyncPlannerWrapper.FirePlanValidated(System.Boolean,System.String,System.String)">
+            <summary>
+            Fires the <see cref="E:GUI.AsyncPlannerWrapper.PlanValidated"/> event.
+            </summary>
+            <param name="planValid">Whether the plan was valid.</param>
+            <param name="output">The standard output of the validator.</param>
+            <param name="errorOutput">The error output of the validator.</param>
+        </member>
+        <member name="M:GUI.AsyncPlannerWrapper.FireExceptionRaised(System.Exception)">
+            <summary>
+            Fires the <see cref="E:GUI.AsyncPlannerWrapper.ExceptionRaised"/> event.
+            </summary>
+            <param name="e">The exception that was thrown.</param>
+        </member>
+        <member name="M:GUI.AsyncPlannerWrapper.Dispose">
+            <summary>
+            Disposes of the worker thread properly.
+            </summary>
+        </member>
+        <member name="P:GUI.AsyncPlannerWrapper.Planner">
+            <summary>
+            The wrapped planner.
+            </summary>
+        </member>
+        <member name="P:GUI.AsyncPlannerWrapper.Parser">
+            <summary>
+            The parser used.
+            </summary>
+        </member>
+        <member name="P:GUI.AsyncPlannerWrapper.Problem">
+            <summary>
+            The problem that is being solved.
+            </summary>
+            <remarks>
+            This can be null if the problem was not parsed correctly, or if the parsing is still in progress.
+            </remarks>
+        </member>
+        <member name="P:GUI.AsyncPlannerWrapper.CurrentState">
+            <summary>
+            The current state of the planner.
+            </summary>
+        </member>
+        <member name="P:GUI.AsyncPlannerWrapper.IsParsed">
+            <summary>
+            Whether the planner is in a state where the problem has been parsed correctly.
+            </summary>
+        </member>
+        <member name="P:GUI.AsyncPlannerWrapper.IsStopped">
+            <summary>
+            Whether the planner is in a stopped state.
+            </summary>
+        </member>
+        <member name="P:GUI.AsyncPlannerWrapper.PauseOnInitialWorld">
+            <summary>
+            Gets or sets whether to pause on the initial world (i.e. at the start of the search).
+            </summary>
+        </member>
+        <member name="E:GUI.AsyncPlannerWrapper.StateChanged">
+            <summary>
+            An event fired when the planner's state changes.
+            </summary>
+        </member>
+        <member name="E:GUI.AsyncPlannerWrapper.Parsed">
+            <summary>
+            An event fired when the parsing and linking of a domain and problem are finished.
+            </summary>
+            <remarks>
+            The <see cref="P:GUI.ParsedEventArgs.ParsedSuccessfully"/> property indicates whether the
+            parsing was successful.
+            Also, the <see cref="E:GUI.AsyncPlannerWrapper.StateChanged"/> event is fired just prior to this event,
+            changing the state to <see cref="F:GUI.AsyncPlannerWrapper.State.Parsed"/>.
+            </remarks>
+        </member>
+        <member name="E:GUI.AsyncPlannerWrapper.PlanFound">
+            <summary>
+            An event fired when a plan is found for a given problem.
+            </summary>
+            <remarks>
+            As of now, this is only called once, but it could ultmately be called more than once for a single
+            problem (e.g. when using iterative deepening)
+            </remarks>
+        </member>
+        <member name="E:GUI.AsyncPlannerWrapper.PlanValidated">
+            <summary>
+            An event fired when the validation of a plan has finished.
+            </summary>
+            <remarks>
+            The <see cref="E:GUI.AsyncPlannerWrapper.StateChanged"/> event is fired just after to this event,
+            changing the state to <see cref="F:GUI.AsyncPlannerWrapper.State.Validated"/>.
+            </remarks>
+        </member>
+        <member name="E:GUI.AsyncPlannerWrapper.ExceptionRaised">
+            <summary>
+            An event fired when an exception occurs while parsing or planning.
+            </summary>
+        </member>
+        <member name="T:GUI.AsyncPlannerWrapper.State">
+            <summary>
+            The different states the planner can be in.
+            </summary>
+        </member>
+        <member name="F:GUI.AsyncPlannerWrapper.State.None">
+            <summary>
+            The state in which the planner is right after its creation.
+            </summary>
+            <remarks>Once the planner changes states, there is no way to come back to the <see cref="F:GUI.AsyncPlannerWrapper.State.None"/> state.</remarks>
+        </member>
+        <member name="F:GUI.AsyncPlannerWrapper.State.Parsing">
+            <summary>
+            The planner is currently parsing or linking domain and problem files.
+            </summary>
+        </member>
+        <member name="F:GUI.AsyncPlannerWrapper.State.Parsed">
+            <summary>
+            The planner has finished parsing or linking domain and problem files.
+            </summary>
+        </member>
+        <member name="F:GUI.AsyncPlannerWrapper.State.Solving">
+            <summary>
+            The planner is currently solving the given problem.
+            </summary>
+        </member>
+        <member name="F:GUI.AsyncPlannerWrapper.State.Solved">
+            <summary>
+            The planner has finished solving the given problem.
+            </summary>
+        </member>
+        <member name="F:GUI.AsyncPlannerWrapper.State.Validating">
+            <summary>
+            The planner is currently validating the plan found for the given problem.
+            </summary>
+        </member>
+        <member name="F:GUI.AsyncPlannerWrapper.State.Validated">
+            <summary>
+            The planner has finished validating the plan found for the given problem.
+            </summary>
+        </member>
+        <member name="F:GUI.AsyncPlannerWrapper.State.Stepping">
+            <summary>
+            The planner is currently stepping to the next world in the current problem.
+            </summary>
+        </member>
+        <member name="F:GUI.AsyncPlannerWrapper.State.Pausing">
+            <summary>
+            The planner is currently pausing the solving.
+            </summary>
+        </member>
+        <member name="F:GUI.AsyncPlannerWrapper.State.Paused">
+            <summary>
+            The planner has paused the solving.
+            </summary>
+        </member>
+        <member name="F:GUI.AsyncPlannerWrapper.State.Unpausing">
+            <summary>
+            The planner is currently resuming the solving.
+            </summary>
+        </member>
+        <member name="F:GUI.AsyncPlannerWrapper.State.Unpaused">
+            <summary>
+            The planner has resumed the solving.
+            </summary>
+        </member>
+        <member name="F:GUI.AsyncPlannerWrapper.State.Stopping">
+            <summary>
+            The planner is currently stopping the solving.
+            </summary>
+        </member>
+        <member name="F:GUI.AsyncPlannerWrapper.State.Stopped">
+            <summary>
+            The planner has stopped the solving.
+            </summary>
+        </member>
+        <member name="T:GUI.PlannerStateChangedEventArgs">
+            <summary>
+            Represents a class containing event data for the <see cref="E:GUI.AsyncPlannerWrapper.StateChanged"/> event.
+            </summary>
+        </member>
+        <member name="M:GUI.PlannerStateChangedEventArgs.#ctor(GUI.AsyncPlannerWrapper.State,GUI.AsyncPlannerWrapper.State)">
+            <summary>
+            Creates a new instance of <see cref="T:GUI.PlannerStateChangedEventArgs"/>.
+            </summary>
+            <param name="oldState">The previous state in which the planner was before this event was triggered.</param>
+            <param name="newState">The new state in which the planner is now.</param>
+        </member>
+        <member name="P:GUI.PlannerStateChangedEventArgs.OldState">
+            <summary>
+            Represents the previous state in which the planner was before this event was triggered.
+            </summary>
+        </member>
+        <member name="P:GUI.PlannerStateChangedEventArgs.NewState">
+            <summary>
+            Represents the new state in which the planner is now.
+            </summary>
+        </member>
+        <member name="T:GUI.ParsedEventArgs">
+            <summary>
+            Represents a class containing event data for the <see cref="E:GUI.AsyncPlannerWrapper.Parsed"/> event.
+            </summary>
+        </member>
+        <member name="M:GUI.ParsedEventArgs.#ctor(System.Boolean)">
+            <summary>
+            Creates a new instance of <see cref="T:GUI.ParsedEventArgs"/>.
+            </summary>
+            <param name="parsedSuccessfully">Whether the domain and problem were parsed and linked successfully.</param>
+        </member>
+        <member name="P:GUI.ParsedEventArgs.ParsedSuccessfully">
+            <summary>
+            Whether the domain and problem were parsed and linked successfully.
+            </summary>
+        </member>
+        <member name="T:GUI.PlanFoundEventArgs">
+            <summary>
+            Represents a class containing event data for the <see cref="E:GUI.AsyncPlannerWrapper.PlanFound"/> event.
+            </summary>
+        </member>
+        <member name="M:GUI.PlanFoundEventArgs.#ctor(TLPlan.Plan)">
+            <summary>
+            Creates a new instance of <see cref="T:GUI.PlanFoundEventArgs"/>.
+            </summary>
+            <param name="plan">The plan which was found by the planner.</param>
+        </member>
+        <member name="P:GUI.PlanFoundEventArgs.Plan">
+            <summary>
+            The plan which was found by the planner.
+            </summary>
+        </member>
+        <member name="T:GUI.PlanValidatedEventArgs">
+            <summary>
+            Represents a class containing event data for the <see cref="E:GUI.AsyncPlannerWrapper.PlanValidated"/> event.
+            </summary>
+        </member>
+        <member name="M:GUI.PlanValidatedEventArgs.#ctor(System.Boolean,System.String,System.String)">
+            <summary>
+            Creates a new instance of <see cref="T:GUI.PlanValidatedEventArgs"/>.
+            </summary>
+            <param name="planValid">Whether the plan was valid.</param>
+            <param name="output">The standard output of the validator.</param>
+            <param name="errorOutput">The error output of the validator.</param>
+        </member>
+        <member name="P:GUI.PlanValidatedEventArgs.PlanValid">
+            <summary>
+            Whether the plan was valid.
+            </summary>
+        </member>
+        <member name="P:GUI.PlanValidatedEventArgs.Out">
+            <summary>
+            The standard output of the validator.
+            </summary>
+        </member>
+        <member name="P:GUI.PlanValidatedEventArgs.Error">
+            <summary>
+            The error output of the validator.
+            </summary>
+        </member>
+        <member name="T:GUI.ExceptionEventArgs">
+            <summary>
+            Represents a class containing event data for the <see cref="E:GUI.AsyncPlannerWrapper.ExceptionRaised"/> event.
+            </summary>
+        </member>
+        <member name="M:GUI.ExceptionEventArgs.#ctor(System.Exception)">
+            <summary>
+            Creates a new instance of <see cref="T:GUI.ExceptionEventArgs"/>.
+            </summary>
+            <param name="e">The exception which was raised.</param>
+        </member>
+        <member name="P:GUI.ExceptionEventArgs.Exception">
+            <summary>
+            The exception which was raised.
+            </summary>
+        </member>
+    </members>
+</doc>

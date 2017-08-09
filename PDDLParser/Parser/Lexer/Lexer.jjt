@@ -1,0 +1,4582 @@
+/*
+ * Copyright Dept. of Mathematics & Computer Science Univ. Paris-Descartes
+ *
+ * This software is governed by the CeCILL  license under French law and
+ * abiding by the rules of distribution of free software.  You can  use,
+ * modify and/ or redistribute the software under the terms of the CeCILL
+ * license as circulated by CEA, CNRS and INRIA at the following URL
+ * "http://www.cecill.info".
+ *
+ * As a counterpart to the access to the source code and  rights to copy,
+ * modify and redistribute granted by the license, users are provided only
+ * with a limited warranty  and the software's author,  the holder of the
+ * economic rights,  and the successive licensors  have only  limited
+ * liability.
+ *
+ * In this respect, the user's attention is drawn to the risks associated
+ * with loading,  using,  modifying and/or developing or reproducing the
+ * software by the user in light of its specific status of free software,
+ * that may mean  that it is complicated to manipulate,  and  that  also
+ * therefore means  that it is reserved for developers  and  experienced
+ * professionals having in-depth computer knowledge. Users are therefore
+ * encouraged to load and test the software's suitability as regards their
+ * requirements in conditions enabling the security of their systems and/or
+ * data to be ensured and,  more generally, to use and operate it in the
+ * same conditions as regards security.
+ *
+ * The fact that you are presently reading this means that you have had
+ * knowledge of the CeCILL license and that you accept its terms.
+ */
+
+options {
+  	//MULTI=true;
+ 	NODE_DEFAULT_VOID=false;
+    STATIC=false;
+    NODE_PREFIX="PDDL_";
+    NODE_USES_PARSER=true;
+    IGNORE_CASE=true;
+}
+
+PARSER_BEGIN(Lexer)
+
+package pddl4j.lexer;
+
+import java.io.InputStream;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
+import pddl4j.ErrorManager;
+import pddl4j.ErrorManager.Message;
+
+public class Lexer {
+	
+	private ErrorManager mgr;
+	private File file;
+
+	private static final int[] BLOCKS = {REQUIREMENTS, 
+		TYPES,
+		CONSTANTS,
+		PREDICATES,
+		FUNCTIONS,
+		ACTION,
+		DURATIVE_ACTION,
+		DERIVED,
+		OBJECTS,
+		INIT,
+		GOAL,
+		METRIC,
+		EOF};
+		
+	private bool isBlock(int token) {
+		int i = 0;
+		while (i < BLOCKS.length && (BLOCKS[i] != token)) i++;
+		return i == BLOCKS.length;
+	}
+	
+	private void error(Throwable e, int line, int column) throws ParseException {
+		String message = new String();
+		if (e.getClass().equals(TokenMgrError.class)) {
+			String[] tmp = e.getMessage().split(" ");
+			int l = -1;
+			int c = -1;
+			int i = 0;
+  			for (i = 0 ; i < tmp.length; i++) {
+  				if (tmp[i].equals("line") && i+1 < tmp.length) {
+  					l = Integer.parseInt(tmp[i+1].substring(0, tmp[i+1].length()-1));
+  				}
+  				if (tmp[i].equals("column") && i+1 < tmp.length) {
+  					c = Integer.parseInt(tmp[i+1].substring(0, tmp[i+1].length()-1));
+  				}
+  			}
+			message = e.getMessage().split(".  ")[1];
+			this.mgr.logLexicalError(message, this.file, l, c);
+		} else if (e.getClass().equals(ParseException.class)) {
+  			ParseException pe = (ParseException) e;
+  			message = generateErrorMesssage(pe);
+  			this.mgr.logLexicalError(message, this.file, pe.currentToken.beginLine, pe.currentToken.beginColumn);
+  		} else if (e instanceof NullPointerException) {
+  			// Do nothing
+  		} else {
+  			e.printStackTrace();
+  			throw new ParseException(e.getMessage());
+  		}
+  		this.skipToNextBlock();
+	}	
+	
+	private void skipToNextBlock() {
+		Token t;
+		Token t2;
+		do {
+  			t = getNextToken();  	
+  			t2 = getToken(2);	
+  			
+  		} while (t2 != null && isBlock(t2.kind));
+	}
+	
+	public void setErrorManager(ErrorManager mgr) {
+		this.mgr = mgr;
+	}
+	
+	public void setFile(File file) {
+		this.file = file;
+	}
+	
+	// Allows lexing and parsing any part of a file directly
+	public SimpleNode popRootNode()
+	{
+		return (SimpleNode)this.jjtree.popNode();
+	}
+	
+	/**
+     * Creates the error message from a specific parse exception.
+     * 
+     * @param pe the parse exception.
+     * @return the error message.
+     */
+    private String generateErrorMesssage(ParseException pe) {
+        StringBuffer expected = new StringBuffer();
+        bool expectedSeq = false;
+        int maxSize = 0;
+        for (int i = 0; i < pe.expectedTokenSequences.length; i++) {
+            if (maxSize < pe.expectedTokenSequences[i].length) {
+                maxSize = pe.expectedTokenSequences[i].length;
+            }
+            for (int j = 0; j < pe.expectedTokenSequences[i].length; j++) {
+                expected.append(pe.tokenImage[pe.expectedTokenSequences[i][j]]).append(" ");
+                expectedSeq = true;
+            }
+            if (pe.expectedTokenSequences[i][pe.expectedTokenSequences[i].length - 1] != 0) {
+                expected.append("...");
+            }
+            if (i < pe.expectedTokenSequences.length - 1) {
+                expected.append("\n").append("    ");
+            }
+        }
+        String retval = "unexpected token \"" + pe.currentToken.next.image + "\".";
+        if (expectedSeq) {
+        	if (pe.expectedTokenSequences.length == 1) {
+            	retval += "\nWas expecting:" + "\n" + "    ";
+        	} else {
+            	retval += "\nWas expecting one of:" + "\n" + "    ";
+        	}
+        	retval += expected.toString();
+        }
+        return retval;
+    }
+}
+PARSER_END(Lexer)
+
+
+SKIP : 
+{ 
+	" "
+| 	"\t"
+|	"\n" 
+| 	"\r"
+}
+MORE : 
+{
+	"//" : IN_SINGLE_LINE_COMMENT 
+|	";" : IN_SINGLE_LINE_COMMENT 
+|	<"/**" ~["/"]> { input_stream.backup(1); } : IN_FORMAL_COMMENT
+|	"/*" : IN_MULTI_LINE_COMMENT 
+}
+<IN_SINGLE_LINE_COMMENT>
+	SPECIAL_TOKEN : { 
+		<SINGLE_LINE_COMMENT: "\n" | "\r" | "\r\n" > : DEFAULT 
+	}
+<IN_FORMAL_COMMENT>
+	SPECIAL_TOKEN :	{
+		<FORMAL_COMMENT: "*/" > : DEFAULT
+	}
+<IN_MULTI_LINE_COMMENT>
+	SPECIAL_TOKEN : {
+		<MULTI_LINE_COMMENT: "*/" > : DEFAULT
+	}
+<IN_SINGLE_LINE_COMMENT,IN_FORMAL_COMMENT,IN_MULTI_LINE_COMMENT> 
+	MORE : {
+		< ~[] > 
+}
+
+TOKEN :
+{
+  	< LPAREN: "(">
+| 	< RPAREN: ")">
+}
+
+TOKEN : {
+	< DEFINE : "define" >
+|	< DOMAIN : "domain" >
+|	< REQUIREMENTS : ":requirements" >
+|	< TYPES : ":types" >
+|	< EITHER : "either" >
+|	< CONSTANTS : ":constants" >
+|	< PREDICATES : ":predicates" >
+|	< FUNCTIONS : ":functions" >
+| < NO_CYCLE_CHECK : "#no-cycle-check" >
+| < DECLARE_DEFINED_SYMBOLS : ":declare-defined-symbols" >
+|	< ACTION : ":action" >
+| < PRIORITY : ":priority" >
+|	< PARAMETERS : ":parameters" >
+|	< PRECONDITION : ":precondition" >
+|	< EFFECT : ":effect" >
+|	< PREFERENCE : "preference" >
+|	< WHEN : "when" >
+|	< DURATIVE_ACTION : ":durative-action" >
+|	< DURATION : ":duration" >
+|	< CONDITION : ":condition" >
+|	< DERIVED : ":derived" >
+| < DEFINED_PREDICATE : ":defined-predicate" >
+| < DEFINED_FUNCTION : ":defined-function" >
+| < LOCAL_VARS : "local-vars" >
+| < ASSIGN_LOCAL_VAR : ":=" >
+|	< PROBLEM : "problem" >
+|	< P_DOMAIN : ":domain" >
+|	< OBJECTS	: ":objects" >
+|	< INIT : ":init" >
+|	< GOAL: ":goal" >
+|	< METRIC : ":metric" >
+}
+
+TOKEN : {
+	< STRIPS : ":strips" >
+|	< TYPING : ":typing" >
+|	< NEGATIVE_PRECONDITIONS : ":negative-preconditions" >
+|	< DISJUNCTIVE_PRECONDITIONS : ":disjunctive-preconditions" >
+|	< EQUALITY : ":equality" >
+|	< EXISTENTIAL_PRECONDITIONS : ":existential-preconditions" >
+|	< UNIVERSAL_PRECONDITIONS : ":universal-preconditions" >
+|	< QUANTIFIED_PRECONDITIONS : ":quantified-preconditions" >
+|	< CONDITIONAL_EFFECTS : ":conditional-effects" >
+| < NUMERIC_FLUENTS : ":numeric-fluents" >
+| < OBJECT_FLUENTS : ":object-fluents" >
+| < FLUENTS : ":fluents" >
+|	< ADL : ":adl" >
+|	< DURATIVE_ACTIONS : ":durative-actions" >
+|	< DERIVED_PREDICATES : ":derived-predicates" >
+|	< TIMED_INITIAL_LITERALS : ":timed-initial-literals" >
+|	< PREFERENCES : ":preferences" >
+|	< CONSTRAINTS : ":constraints" >
+|	< CONTINOUS_EFFECTS : ":continuous-effects" >
+|	< DURATION_INEQUALITIES : ":duration-inequalities" >
+|	< TLPLAN : ":tlplan" >
+}
+
+TOKEN :
+{
+	< GREATER : ">" >
+|	< LESS : "<" >
+|	< GEQUAL : ">=" >
+|	< LEQUAL : "<=" >
+|	< EQUAL : "=" >
+}
+
+TOKEN :
+{
+  < NUMBER :  ("-")?(<DIGIT>)+ ("." (<DIGIT>)*)? >
+}
+
+TOKEN :
+{
+	< MUL : "*" >
+|	< DIV : "/" >
+|	< ADD : "+" >
+|	< SUB : "-" >
+|	< MOD : "mod" >
+|	< MAX : "max" >
+| < MIN : "min" >
+|	< EXPT : "expt" >
+|	< SQRT : "sqrt" >
+|	< ABS : "abs" >
+|	< LOG : "log" >
+|	< EXP : "exp" >
+|	< ROUND : "round" >
+|	< INT : "int" >
+|	< FLOOR : "floor" >
+|	< CEIL : "ceil" >
+}
+
+TOKEN :
+{
+	<ASSIGN : "assign" >
+|	<SCALE_UP : "scale-up" >
+|	<SCALE_DOWN : "scale-down" >
+|	<INCREASE : "increase" >
+|	<DECREASE : "decrease" >
+}
+
+TOKEN :
+{
+	< OR : "or" >
+|	< AND : "and" >
+|	< XOR_UNIQUE : "xor!" >
+|	< IMPLY : "imply" >
+| < IF_THEN_ELSE : "if-then-else" >
+|	< NOT : "not" >
+|	< FORALL : "forall" >
+|	< EXISTS : "exists" >
+| < EXISTS_UNIQUE : "exists!" >
+|	< GOAL_MODALITY : "GOAL" >
+}
+
+TOKEN :
+{
+	< ALWAYS : "always" >
+|	< SOMETIME : "sometime" >
+|	< EVENTUALLY : "eventually" >
+|	< WITHIN : "within" >
+|	< AT_MOST_ONCE : "at-most-once" >
+|	< SOMETIME_AFTER : "sometime-after" >
+|	< SOMETIME_BEFORE : "sometime-before" >
+|	< ALWAYS_WITHIN : "always-within" >
+|	< HOLD_DURING : "hold-during" >
+|	< HOLD_AFTER : "hold-after" >
+|	< UNTIL : "until" >
+|	< WEAK_UNTIL : "weak-until" >
+|	< NEXT : "next" >
+|	< AT: "at" >
+|	< START : "start">
+|	< END : "end">
+|	< OVER : "over">
+|	< ALL : "all">
+|	< TOTAL_TIME : "total-time" >
+|	< MAXIMIZE : "maximize" >
+|	< MINIMIZE : "minimize" >
+|	< IS_VIOLATED : "is-violated" >
+|	< T_ALWAYS : "t-always" >
+|	< T_EVENTUALLY : "t-eventually" >
+|	< T_UNTIL : "t-until" >
+}
+
+TOKEN :
+{
+	< VAR_DURATION : "?duration" >
+|	< CONTINOUS_VARIABLE : "#t" >
+}
+
+TOKEN :
+{
+	< POSITIVE_INFINITY : "inf+" >
+|	< NEGATIVE_INFINITY : "inf-" >
+|	< LBRACKET: "[">
+|	< RBRACKET: "]">
+|	< COLON: ":">
+|	< COMMA: ",">
+}
+
+TOKEN :
+{
+	< NUMBER_TYPE : "number" >
+|	< OBJECT_TYPE : "object" >
+|	< UNDEFINED : "undefined">
+}
+
+
+TOKEN :
+{
+	< SYMBOL : ((<LETTER> (<LETTER> | <DIGIT>)*)) >
+|	< #DIGIT : ["0"-"9"] >
+|	< #LETTER : ["a"-"z","A"-"Z","_","-","#"] > 
+}
+
+SimpleNode parse() #ROOT:
+{
+	Token t= null;
+}
+{
+	try {
+		LOOKAHEAD(4) t=domain()
+	| LOOKAHEAD(4) t=problem()
+	} catch (Throwable e) {
+		this.mgr.logLexicalError("Lexical error file (" +file.getName() + ") : too many errors", file);
+		throw new ParseException(e.getMessage());
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return jjtThis;
+	}
+}
+
+Token domain() #DOMAIN:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <DEFINE> <LPAREN> <DOMAIN> domain_name() <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	try {
+		[LOOKAHEAD(2) t=require_def()]
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	try {
+		[LOOKAHEAD(2) t=type_def()]
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	try {
+		[LOOKAHEAD(2) t=constants_def()]
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	try {
+		[LOOKAHEAD(2) t=predicates_def()]
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	try {
+		[LOOKAHEAD(2) t=functions_def()]
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	try {
+		[LOOKAHEAD(2) t=constraints()]
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+  try {
+		[LOOKAHEAD(2) t=declare_defined_symbols()]
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	try {
+		(t=structure_def())*
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	try {
+		<RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+	
+Token require_def() #REQUIRE_DEF:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <REQUIREMENTS> (require_key())+ <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	} 
+	{
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token require_key() #REQUIRE_KEY: 
+{
+	Token t = token;
+}
+{
+	try {
+		t=<STRIPS>
+	|	t=<TYPING> 
+	|	t=<NEGATIVE_PRECONDITIONS>
+	|	t=<DISJUNCTIVE_PRECONDITIONS>
+	|	t=<EQUALITY> 
+	|	t=<EXISTENTIAL_PRECONDITIONS>
+	|	t=<UNIVERSAL_PRECONDITIONS>
+	|	t=<QUANTIFIED_PRECONDITIONS>
+	|	t=<CONDITIONAL_EFFECTS>
+	|	t=<OBJECT_FLUENTS>
+	|	t=<NUMERIC_FLUENTS>
+	|	t=<FLUENTS>
+	|	t=<ADL>
+	|	t=<DURATIVE_ACTIONS>
+	|	t=<DERIVED_PREDICATES>
+	|	t=<TIMED_INITIAL_LITERALS>
+	|	t=<PREFERENCES>
+	|	t=<CONSTRAINTS>
+	|	t=<CONTINOUS_EFFECTS>
+	|	t=<DURATION_INEQUALITIES>
+	| t=<TLPLAN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		jjtThis.setImage(t.image);
+		return t;
+	}
+}
+
+Token type_def() #TYPE_DEF:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <TYPES> typed_list(LexerTreeConstants.JJTPRIMITIVE_TYPE) <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token typed_list(int typ) #TYPED_LIST:
+{
+	Token t = token;
+}
+{
+	try {
+		LOOKAHEAD(2, {typ == LexerTreeConstants.JJTPRIMITIVE_TYPE})
+			(t=primitive_type())* (<SUB> type() typed_list(typ))?
+	|	LOOKAHEAD(2, {typ == LexerTreeConstants.JJTCONSTANT})	
+			(t=constant())* (<SUB> type() typed_list(typ))? 
+	|	LOOKAHEAD(2, {typ == LexerTreeConstants.JJTVARIABLE})	
+			(t=variable())* (<SUB> type() typed_list(typ))? 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		if (t != null) {
+				jjtThis.setLine(t.beginLine);
+				jjtThis.setColumn(t.beginColumn);
+				jjtThis.setTypeId(LexerTreeConstants.JJTVARIABLE);
+		}
+		return t;
+	}
+}
+
+Token type() #TYPE:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <EITHER> (primitive_type())+ <RPAREN>
+	|	t=primitive_type()
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}	
+
+Token primitive_type() #PRIMITIVE_TYPE:
+{
+	Token t = token;
+}
+{
+(	t=<OBJECT_TYPE> |	t=<SYMBOL>)
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		jjtThis.setImage(t.image);
+		return t;
+	}
+}
+
+Token constants_def() #CONSTANT_DEF:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <CONSTANTS> typed_list(LexerTreeConstants.JJTCONSTANT) <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token constant() #CONSTANT:
+{
+	Token t = token;
+}
+{
+	t=<SYMBOL> 
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		jjtThis.setImage(t.image);
+		return t;
+	}
+}
+
+Token predicates_def() #PREDICATE_DEF:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <PREDICATES> (atomic_formula_skeleton_declaration())+ <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token attribute() #ATTRIBUTE:
+{
+	Token t = token;
+}
+{
+	t=<NO_CYCLE_CHECK>
+	{ 
+	  jjtThis.setTypeId(t.kind);
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token atomic_formula_skeleton() #ATOMIC_FORMULA_SKELETON:
+{
+	Token t = token;
+}
+{
+	t=<LPAREN> predicate() typed_list(LexerTreeConstants.JJTVARIABLE) <RPAREN>
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token atomic_formula_skeleton_declaration() #ATOMIC_FORMULA_SKELETON_DECLARATION:
+{
+	Token t = token;
+}
+{
+	t=<LPAREN> predicate() typed_list(LexerTreeConstants.JJTVARIABLE) <RPAREN> (attribute())*
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token predicate() #PREDICATE:
+{
+	Token t = token;
+}
+{
+	(t=<SYMBOL> | t=<AT>) 
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		jjtThis.setImage(t.image);
+		return t;
+	}
+}
+
+Token variable() #VARIABLE:
+{
+	Token t = token;
+}
+{
+	"?" (t=<SYMBOL> | t=<OBJECT_TYPE> | t=<NUMBER_TYPE>)
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		jjtThis.setImage(t.image);
+		return t;
+	}
+}
+
+Token functions_def() #FUNCTION_DEF:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <FUNCTIONS> function_typed_list(LexerTreeConstants.JJTATOMIC_FUNCTION_SKELETON_DECLARATION) <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token atomic_function_skeleton() #ATOMIC_FUNCTION_SKELETON:
+{
+	Token t = token;
+}
+{
+	t=<LPAREN> functor() typed_list(LexerTreeConstants.JJTVARIABLE) <RPAREN>
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token atomic_function_skeleton_declaration() #ATOMIC_FUNCTION_SKELETON_DECLARATION:
+{
+	Token t = token;
+}
+{
+	t=<LPAREN> functor() typed_list(LexerTreeConstants.JJTVARIABLE) <RPAREN> (attribute())*
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+
+Token functor() #FUNCTOR:
+{
+	Token t = token;
+}
+{
+	(t=<SYMBOL> | t=<AT>)
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		jjtThis.setImage(t.image);
+		return t;
+	}
+}
+
+Token function_typed_list(int typ) #FUNCTION_TYPED_LIST:
+{
+	Token t = token;
+}
+{
+  try {
+    (
+      LOOKAHEAD({typ == LexerTreeConstants.JJTATOMIC_FUNCTION_SKELETON_DECLARATION }) (t=atomic_function_skeleton_declaration())*
+    | LOOKAHEAD({typ == LexerTreeConstants.JJTVARIABLE }) (t=variable())*
+    ) (<SUB> function_type() function_typed_list(typ))? 
+  } catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		if (t != null) {
+		  jjtThis.setTypeId(typ);
+			jjtThis.setLine(t.beginLine);
+			jjtThis.setColumn(t.beginColumn);
+		}
+		return t;
+	}
+}
+
+Token typed_function() #TYPED_FUNCTION:
+{
+  Token t = token;
+}
+{
+  try {
+    t=atomic_function_skeleton() (<SUB> function_type())? 
+  } catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		if (t != null) {
+			jjtThis.setLine(t.beginLine);
+			jjtThis.setColumn(t.beginColumn);
+		}
+		return t;
+	}
+}
+
+Token function_type() #FUNCTION_TYPE:
+{
+	Token t = token;
+}
+{
+	try
+	{
+		t=<NUMBER_TYPE> | t=type()
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		jjtThis.setImage(t.image);
+		return t;
+	}
+}
+
+Token con_gd() #CON_GD:
+{
+	Token t = token;
+}
+{
+	try {
+		LOOKAHEAD(2) t=and_con_gd()
+	|	LOOKAHEAD(2) t=or_con_gd()
+	|	LOOKAHEAD(2) t=xor_unique_con_gd()
+	|	LOOKAHEAD(2) t=not_con_gd()
+	|	LOOKAHEAD(2) t=imply_con_gd()
+	|	LOOKAHEAD(2) t=if_then_else_con_gd()
+	|	LOOKAHEAD(2) t=exists_sub_con_gd()
+	|	LOOKAHEAD(2) t=exists_unique_sub_con_gd()
+	|	LOOKAHEAD(2) t=forall_con_gd()
+	|	LOOKAHEAD(2) t=at_end_con_gd()
+	|	LOOKAHEAD(2) t=t_always_con_gd()
+	|	LOOKAHEAD(2) t=t_eventually_con_gd()
+	|	LOOKAHEAD(2) t=t_until_con_gd()
+	|	LOOKAHEAD(2) t=always_con_gd()
+	|	LOOKAHEAD(2) t=until_con_gd()
+	|	LOOKAHEAD(2) t=weak_until_con_gd()
+	|	LOOKAHEAD(2) t=next_con_gd()
+	|	LOOKAHEAD(2) t=sometime_con_gd() 
+	|	LOOKAHEAD(2) t=within_con_gd() 
+	|	LOOKAHEAD(2) t=at_most_once_con_gd()
+	|	LOOKAHEAD(2) t=sometime_after_con_gd()
+	|	LOOKAHEAD(2) t=sometime_before_con_gd()
+	|	LOOKAHEAD(2) t=always_within_con_gd()
+	|	LOOKAHEAD(2) t=hold_during_con_gd()
+	|	LOOKAHEAD(2) t=hold_after_con_gd()
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token and_con_gd() #AND_CON_GD:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <AND> (con_gd())* <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token or_con_gd() #OR_CON_GD: 
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <OR> (con_gd())* <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token xor_unique_con_gd() #XOR_UNIQUE_CON_GD:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <XOR_UNIQUE> (con_gd())+ <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token not_con_gd() #NOT_CON_GD: 
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <NOT> con_gd() <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token imply_con_gd() #IMPLY_CON_GD: 
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <IMPLY> gd() con_gd() <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token if_then_else_con_gd() #IF_THEN_ELSE_CON_GD: 
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <IF_THEN_ELSE> gd() con_gd() con_gd() <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token exists_con_gd() #EXISTS_CON_GD: 
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <EXISTS> <LPAREN> typed_list(LexerTreeConstants.JJTVARIABLE) <RPAREN> con_gd() <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token exists_unique_con_gd() #EXISTS_UNIQUE_CON_GD: 
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <EXISTS_UNIQUE> <LPAREN> typed_list(LexerTreeConstants.JJTVARIABLE) <RPAREN> con_gd() <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token forall_con_gd() #FORALL_CON_GD:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <FORALL> <LPAREN> typed_list(LexerTreeConstants.JJTVARIABLE) <RPAREN> con_gd() <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token at_end_con_gd() #AT_END_CON_GD:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <AT> <END> gd() <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token t_always_con_gd() #T_ALWAYS_CON_GD:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <T_ALWAYS> time_interval() sub_con_gd() <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token t_eventually_con_gd() #T_EVENTUALLY_CON_GD:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <T_EVENTUALLY> time_interval() sub_con_gd() <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token t_until_con_gd() #T_UNTIL_CON_GD:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <T_UNTIL> time_interval() sub_con_gd() sub_con_gd() <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token always_con_gd() #ALWAYS_CON_GD:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <ALWAYS> sub_con_gd() <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token until_con_gd() #UNTIL_CON_GD:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <UNTIL> sub_con_gd() sub_con_gd() <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token weak_until_con_gd() #WEAK_UNTIL_CON_GD:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <WEAK_UNTIL> sub_con_gd() sub_con_gd() <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token next_con_gd() #NEXT_CON_GD:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <NEXT> sub_con_gd() <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token sometime_con_gd() #SOMETIME_CON_GD:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> (<SOMETIME> | <EVENTUALLY>) sub_con_gd() <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token within_con_gd() #WITHIN_CON_GD:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <WITHIN> number() sub_con_gd() <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token at_most_once_con_gd() #AT_MOST_ONCE_CON_GD:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <AT_MOST_ONCE> sub_con_gd() <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token sometime_after_con_gd() #SOMETIME_AFTER_CON_GD:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <SOMETIME_AFTER> sub_con_gd() sub_con_gd() <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token sometime_before_con_gd() #SOMETIME_BEFORE_CON_GD:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <SOMETIME_BEFORE> sub_con_gd() sub_con_gd() <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token always_within_con_gd() #ALWAYS_WITHIN_CON_GD:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <ALWAYS_WITHIN> number() sub_con_gd() sub_con_gd() <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token hold_during_con_gd() #HOLD_DURING_CON_GD:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <HOLD_DURING> number() number() sub_con_gd() <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token hold_after_con_gd() #HOLD_AFTER_CON_GD:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <HOLD_AFTER> number() sub_con_gd() <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token time_interval() #TIME_INTERVAL:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<COLON> lower_time_bound() <COMMA> upper_time_bound() <COLON> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token lower_time_bound() #LOWER_TIME_BOUND:
+{
+	Token t = token;
+}
+{
+	try {
+		t=lower_bound_type() lower_bound_time()
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token lower_bound_type() #LOWER_BOUND_TYPE:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LBRACKET>
+	|	t=<LPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		jjtThis.setImage(t.image);
+		return t;
+	}
+}
+
+Token lower_bound_time() #LOWER_BOUND_TIME:
+{
+	Token t = token;
+}
+{
+	try {
+		t=number()
+	|	t=negative_infinity()
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token negative_infinity() #NEGATIVE_INFINITY:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<NEGATIVE_INFINITY>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		jjtThis.setImage(t.image);
+		return t;
+	}
+}
+
+Token upper_time_bound() #UPPER_TIME_BOUND:
+{
+	Token t = token;
+}
+{
+	try {
+		t=upper_bound_time() upper_bound_type()
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token upper_bound_type() #UPPER_BOUND_TYPE:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<RBRACKET>
+	|	t=<RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		jjtThis.setImage(t.image);
+		return t;
+	}
+}
+
+Token upper_bound_time() #UPPER_BOUND_TIME:
+{
+	Token t = token;
+}
+{
+	try {
+		t=number()
+	|	t=positive_infinity()
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token positive_infinity() #POSITIVE_INFINITY:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<POSITIVE_INFINITY>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		jjtThis.setImage(t.image);
+		return t;
+	}
+}
+
+Token sub_con_gd() #SUB_CON_GD:
+{
+	Token t = token;
+}
+{
+	try {
+	// The first non-terminals override con_gd()'s non-terminals, so that they can contain anything
+		LOOKAHEAD(2) t=and_sub_con_gd()
+	|	LOOKAHEAD(2) t=or_sub_con_gd()
+	|	LOOKAHEAD(2) t=xor_unique_sub_con_gd()
+	|	LOOKAHEAD(2) t=not_sub_con_gd()
+	|	LOOKAHEAD(2) t=imply_sub_con_gd()
+	|	LOOKAHEAD(2) t=if_then_else_sub_con_gd()	
+	|	LOOKAHEAD(2) t=exists_sub_con_gd()
+	|	LOOKAHEAD(2) t=exists_unique_sub_con_gd()
+	|	LOOKAHEAD(2) t=forall_sub_con_gd()
+	// Then any other con_gd() can be recognized
+	|	LOOKAHEAD(2) t=con_gd()
+	// Finally, this can also be a gd()
+	|	LOOKAHEAD(2) t=gd()
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token and_sub_con_gd() #AND_SUB_CON_GD:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <AND> (sub_con_gd())* <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token or_sub_con_gd() #OR_SUB_CON_GD: 
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <OR> (sub_con_gd())* <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token xor_unique_sub_con_gd() #XOR_UNIQUE_SUB_CON_GD: 
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <XOR_UNIQUE> (sub_con_gd())+ <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token not_sub_con_gd() #NOT_SUB_CON_GD: 
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <NOT> sub_con_gd() <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token imply_sub_con_gd() #IMPLY_SUB_CON_GD: 
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <IMPLY> gd() sub_con_gd() <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token if_then_else_sub_con_gd() #IF_THEN_ELSE_SUB_CON_GD: 
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <IF_THEN_ELSE> gd() sub_con_gd() sub_con_gd() <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token exists_sub_con_gd() #EXISTS_SUB_CON_GD: 
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <EXISTS> <LPAREN> typed_list(LexerTreeConstants.JJTVARIABLE) <RPAREN> sub_con_gd() <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token exists_unique_sub_con_gd() #EXISTS_UNIQUE_SUB_CON_GD: 
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <EXISTS_UNIQUE> <LPAREN> typed_list(LexerTreeConstants.JJTVARIABLE) <RPAREN> sub_con_gd() <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token forall_sub_con_gd() #FORALL_SUB_CON_GD:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <FORALL> <LPAREN> typed_list(LexerTreeConstants.JJTVARIABLE) <RPAREN> sub_con_gd() <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token gd() #GD: 
+{
+	Token t = token;
+}
+{
+	try {
+		LOOKAHEAD(2) t=atomic_formula(LexerTreeConstants.JJTTERM) 		
+	|	LOOKAHEAD(2) t=and_gd()
+	|	LOOKAHEAD(2) t=or_gd()
+	|	LOOKAHEAD(2) t=xor_unique_gd()
+	|	LOOKAHEAD(2) t=not_gd() 
+	|	LOOKAHEAD(2) t=imply_gd()
+	|	LOOKAHEAD(2) t=if_then_else_gd()
+	|	LOOKAHEAD(2) t=exists_gd()
+	|	LOOKAHEAD(2) t=exists_unique_gd()
+	|	LOOKAHEAD(2) t=forall_gd()
+	|	LOOKAHEAD(2) t=f_comp() 
+	|	LOOKAHEAD(2) t=goal_modality()
+	|	LOOKAHEAD(2) t=assign_local_var()
+		
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token goal_modality() #GOAL_MODALITY: 
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <GOAL_MODALITY> gd() <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token assign_local_var() #ASSIGN_LOCAL_VAR: 
+{
+  Token t = token;
+}
+{
+  try {
+    t=<LPAREN> <ASSIGN_LOCAL_VAR> function_or_variable() local_value() <RPAREN> 
+  } catch (Throwable e) {
+    this.error(e, t.beginLine, t.beginColumn);
+  }
+  { 
+    jjtThis.setLine(t.beginLine);
+    jjtThis.setColumn(t.beginColumn);
+    return t;
+  }
+}
+
+Token function_or_variable() #FUNCTION_OR_VARIABLE: 
+{
+  Token t = token;
+}
+{
+  try {
+    t=functor()
+  | t=variable()
+  } catch (Throwable e) {
+    this.error(e, t.beginLine, t.beginColumn);
+  }
+  { 
+    jjtThis.setLine(t.beginLine);
+    jjtThis.setColumn(t.beginColumn);
+    return t;
+  }
+}
+
+Token local_value() #LOCAL_VALUE: 
+{
+  Token t = token;
+}
+{
+  try {
+    LOOKAHEAD(3) t=variable()
+  | LOOKAHEAD(3) t=f_exp()
+  | LOOKAHEAD(3) t=term()
+  } catch (Throwable e) {
+    this.error(e, t.beginLine, t.beginColumn);
+  }
+  { 
+    jjtThis.setLine(t.beginLine);
+    jjtThis.setColumn(t.beginColumn);
+    return t;
+  }
+}
+
+Token and_gd() #AND_GD: 
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <AND> (gd())* <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token or_gd() #OR_GD: 
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <OR> (gd())* <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token xor_unique_gd() #XOR_UNIQUE_GD: 
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <XOR_UNIQUE> (gd())+ <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token not_gd() #NOT_GD: 
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <NOT> gd() <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token imply_gd() #IMPLY_GD: 
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <IMPLY> gd() gd() <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token if_then_else_gd() #IF_THEN_ELSE_GD: 
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <IF_THEN_ELSE> gd() gd() gd() <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token exists_gd() #EXISTS_GD: 
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <EXISTS> <LPAREN> typed_list(LexerTreeConstants.JJTVARIABLE) <RPAREN> gd() <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token exists_unique_gd() #EXISTS_UNIQUE_GD: 
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <EXISTS_UNIQUE> <LPAREN> typed_list(LexerTreeConstants.JJTVARIABLE) <RPAREN> gd() <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token forall_gd() #FORALL_GD: 
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <FORALL> <LPAREN> typed_list(LexerTreeConstants.JJTVARIABLE) <RPAREN> gd() <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+	
+Token atomic_formula(int typ) #ATOMIC_FORMULA:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> predicate() (		
+		LOOKAHEAD({ typ == LexerTreeConstants.JJTCONSTANT } ) (constant())* {
+				jjtThis.setTypeId(LexerTreeConstants.JJTCONSTANT);
+			}
+		| LOOKAHEAD({ typ == LexerTreeConstants.JJTTERM }) (term())* {		
+				jjtThis.setTypeId(LexerTreeConstants.JJTTERM);
+			}
+		) <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+		
+Token term() #TERM:
+{
+	Token t = token;
+}
+{
+	try {
+		t=function_term_or_constant()
+//	|	t=constant() 
+	|	t=variable() 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+//Token function_term() #FUNCTION_TERM:
+//{
+//	Token t = token;
+//}
+//{
+//	try {	
+//	  t=function_head()
+//	} catch (Throwable e) {
+//		this.error(e, t.beginLine, t.beginColumn);
+//	}
+//	{ 
+//		jjtThis.setLine(t.beginLine);
+//		jjtThis.setColumn(t.beginColumn);
+//		return t;
+//	}
+//}
+
+Token function_term_or_constant() #FUNCTION_TERM_OR_CONSTANT:
+{
+	Token t = token;
+}
+{
+	try {	
+	  t=function_head_or_functor()
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token literal(int typ) #LITERAL:
+{
+	Token t = token;
+}
+{
+	try {
+		LOOKAHEAD(2) t=atomic_formula(typ)
+	| LOOKAHEAD(2) t=not_atomic_formula(typ)
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token not_atomic_formula(int typ) #NOT_ATOMIC_FORMULA:
+{
+	Token t = token;
+}
+{		
+	try {
+		t=<LPAREN> <NOT> atomic_formula(typ) <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token f_comp() #F_COMP:
+{
+	Token t = token;
+}
+{
+	try {
+		t=binary_comp() 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token binary_comp() #BINARY_COMP:
+{
+	Token t = token;
+}
+{
+	try {
+		LOOKAHEAD(2) t=greater_comp()
+	|	LOOKAHEAD(2) t=less_comp()
+	|	LOOKAHEAD(2) t=greater_equal_comp()
+	|	LOOKAHEAD(2) t=less_equal_comp()
+	|	LOOKAHEAD(2) t=equal_comp()
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token greater_comp() #GREATER_COMP:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <GREATER> f_exp() f_exp() <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token greater_equal_comp() #GREATER_EQUAL_COMP:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <GEQUAL> f_exp() f_exp() <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token less_equal_comp() #LESS_EQUAL_COMP:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <LEQUAL> f_exp() f_exp() <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token less_comp() #LESS_COMP:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <LESS> f_exp() f_exp() <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token equal_comp() #EQUAL_COMP:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <EQUAL> f_exp_or_term() f_exp_or_term() <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token f_exp() #F_EXP:
+{
+	Token t = token;
+}
+{
+	try {
+		t=number()
+	|	t=variable()
+	|	LOOKAHEAD(2) t=op()
+	|	LOOKAHEAD(2) t=f_head()
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token number() #NUMBER:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<NUMBER> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		jjtThis.setImage(t.image);
+		return t;
+	}
+}
+
+Token op() #OP:
+{
+	Token t = token;
+}
+{
+	try{
+		LOOKAHEAD(2) t=add_op()
+	|	LOOKAHEAD(2) t=substract_op()
+	|	LOOKAHEAD(2) t=multiply_op()
+	|	LOOKAHEAD(2) t=divide_op()
+	|	LOOKAHEAD(2) t=mod_op()
+	|	LOOKAHEAD(2) t=max_op()
+	|	LOOKAHEAD(2) t=min_op()
+	|	LOOKAHEAD(2) t=expt_op()
+	|	LOOKAHEAD(2) t=sqrt_op()
+	|	LOOKAHEAD(2) t=abs_op()
+	|	LOOKAHEAD(2) t=log_op()
+	|	LOOKAHEAD(2) t=exp_op()
+	|	LOOKAHEAD(2) t=round_op()
+	|	LOOKAHEAD(2) t=int_op()
+	|	LOOKAHEAD(2) t=floor_op()
+	|	LOOKAHEAD(2) t=ceil_op()
+	
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token add_op() #ADD_OP:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <ADD> (f_exp())+ <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token substract_op() #SUBSTRACT_OP:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <SUB> (f_exp())+ <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token multiply_op() #MULTIPLY_OP:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <MUL> f_exp() (f_exp())+ <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token divide_op() #DIVIDE_OP:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <DIV> f_exp() (f_exp())+ <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token mod_op() #MOD_OP:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <MOD> (f_exp())+ <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token max_op() #MAX_OP:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <MAX> (f_exp())+ <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token min_op() #MIN_OP:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <MIN> (f_exp())+ <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token expt_op() #EXPT_OP:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <EXPT> f_exp() (f_exp())+ <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token sqrt_op() #SQRT_OP:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <SQRT> f_exp() <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token abs_op() #ABS_OP:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <ABS> (f_exp())+ <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token log_op() #LOG_OP:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <LOG> f_exp() (f_exp())? <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token exp_op() #EXP_OP:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <EXP> f_exp() <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token round_op() #ROUND_OP:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <ROUND> f_exp() <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token int_op() #INT_OP:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <INT> f_exp() <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token floor_op() #FLOOR_OP:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <FLOOR> f_exp() <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token ceil_op() #CEIL_OP:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <CEIL> f_exp() <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token f_head() #F_HEAD:
+{
+	Token t = token;
+}
+{
+	try {
+		t=function_head_or_functor()
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token function_head() #FUNCTION_HEAD:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> functor() (term())* <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token function_head_or_functor() #FUNCTION_HEAD_OR_FUNCTOR:
+{
+	Token t = token;
+}
+{
+	try {
+		t=function_head()
+	|	t=functor()
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token declare_defined_symbols() #DECLARE_DEFINED_SYMBOLS:
+{
+	Token t = token;
+}
+{
+	try {
+    t=<LPAREN> <DECLARE_DEFINED_SYMBOLS> (defined_formula_declaration())* <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token structure_def() #STRUCTURE_DEF:
+{
+	Token t = token;
+}
+{
+	try {
+    LOOKAHEAD(2) t=action_def()
+	|	LOOKAHEAD(2) t=durative_action_def()
+	| LOOKAHEAD(2) t=defined_formula()
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token defined_formula_declaration() #DEFINED_FORMULA_DECLARATION:
+{
+	Token t = token;
+}
+{
+	try {
+	  LOOKAHEAD(2) t=derived_def_declaration()
+	| LOOKAHEAD(2) t=defined_predicate_declaration()
+	| LOOKAHEAD(2) t=defined_function_declaration()
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token defined_formula() #DEFINED_FORMULA:
+{
+	Token t = token;
+}
+{
+	try {
+	  LOOKAHEAD(2) t=derived_def()
+	| LOOKAHEAD(2) t=defined_predicate()
+	| LOOKAHEAD(2) t=defined_function()
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token action_def() #ACTION_DEF:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <ACTION> action_name()
+		[<PRIORITY> number()]
+		<PARAMETERS> <LPAREN> typed_list(LexerTreeConstants.JJTVARIABLE) <RPAREN>
+		action_def_body()
+		<RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token action_name() #ACTION_NAME:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<SYMBOL>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		jjtThis.setImage(t.image);
+		return t;
+	}
+}
+
+Token action_def_body() #ACTION_DEF_BODY:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<PRECONDITION> pre_gd()
+		<EFFECT> effect() 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);	
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token pre_gd() #PRE_GD:
+{
+	Token t = token;
+}
+{
+	try {
+		LOOKAHEAD(2) t=empty_or()
+	|	LOOKAHEAD(2) t=and_pre_gd()
+	|	LOOKAHEAD(2) t=forall_pre_gd()
+	|	LOOKAHEAD(2) t=pref_gd()
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token empty_or() #EMPTY_OR:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token and_pre_gd() #AND_PRE_GD:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <AND> (pre_gd())* <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}	
+
+Token forall_pre_gd() #FORALL_PRE_GD:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <FORALL> <LPAREN> typed_list(LexerTreeConstants.JJTVARIABLE) <RPAREN> pre_gd() <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token pref_gd() #PREF_GD:
+{
+	Token t = token;
+}
+{
+	try {
+		LOOKAHEAD(2) t=named_pref_gd()
+	|	t=gd()
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token named_pref_gd() #NAMED_PREF_GD:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <PREFERENCE> [pref_name()] gd() <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		
+		return t;
+	}
+}
+
+
+Token pref_name() #PREF_NAME:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<SYMBOL>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		jjtThis.setImage(t.image);
+		return t;
+	}
+}
+
+Token effect() #EFFECT:
+{
+	Token t = token;
+}
+{
+	try {
+		LOOKAHEAD(2) t=and_c_effect()
+	|	LOOKAHEAD(2) t=c_effect()
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token and_c_effect() #AND_C_EFFECT:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <AND> (c_effect())* <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token c_effect() #C_EFFECT:
+{
+	Token t = token;
+}
+{
+	try {
+		LOOKAHEAD(2) t=forall_effect()
+	|	LOOKAHEAD(2) t=when_con_effect()
+	|	LOOKAHEAD(2) t=p_effect()
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token forall_effect() #FORALL_EFFECT:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <FORALL> <LPAREN> typed_list(LexerTreeConstants.JJTVARIABLE) <RPAREN> effect() <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token when_con_effect() #WHEN_CON_EFFECT:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <WHEN> gd() cond_effect() <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token cond_effect() #COND_EFFECT:
+{
+	Token t = token;
+}
+{
+	try {
+		LOOKAHEAD(2) t=and_p_effect()
+	|	LOOKAHEAD(2) t=p_effect()
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token and_p_effect() #AND_P_EFFECT:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <AND> (p_effect())* <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token p_effect() #P_EFFECT:
+{
+	Token t = token;
+}
+{
+ 	try {
+ 	  LOOKAHEAD(2) t=<LPAREN> <ASSIGN> function_head_or_functor() f_exp_or_term_or_undefined() <RPAREN>
+ 	| LOOKAHEAD(2) t=assign_op(LexerTreeConstants.JJTF_EXP)
+	|	LOOKAHEAD(2) t=literal(LexerTreeConstants.JJTTERM)
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token f_exp_or_term() #F_EXP_OR_TERM:
+{
+	Token t = token;
+}
+{
+ 	try {
+ 	  LOOKAHEAD(2) t=function_head_or_functor()
+ 	| LOOKAHEAD(2) t=term()
+ 	| LOOKAHEAD(2) t=f_exp()
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token f_exp_or_term_or_undefined() #F_EXP_OR_TERM_OR_UNDEFINED:
+{
+	Token t = token;
+}
+{
+ 	try {
+ 	  t=<UNDEFINED>
+ 	| t=f_exp_or_term() 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		jjtThis.setTypeId(t.kind);
+		return t;
+	}
+}
+
+Token assign_op(int typ) #ASSIGN_OP:
+{
+	Token t = token;
+}
+{
+	try {
+	  LOOKAHEAD(2) t=assign(typ)
+	| LOOKAHEAD(2) t=scale_up(typ)
+	| LOOKAHEAD(2) t=scale_down(typ)
+	| LOOKAHEAD(2) t=increase(typ)
+	| LOOKAHEAD(2) t=decrease(typ)
+	
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token assign(int typ) #ASSIGN:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <ASSIGN> f_head() (
+		  LOOKAHEAD({ typ == LexerTreeConstants.JJTF_EXP }) f_exp()
+		| LOOKAHEAD({ typ == LexerTreeConstants.JJTF_EXP_DA }) f_exp_da()
+		) <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+	  jjtThis.setTypeId(typ);
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token scale_up(int typ) #SCALE_UP:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <SCALE_UP> f_head() (
+		  LOOKAHEAD({ typ == LexerTreeConstants.JJTF_EXP }) f_exp()
+		| LOOKAHEAD({ typ == LexerTreeConstants.JJTF_EXP_DA }) f_exp_da()
+		) <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+	  jjtThis.setTypeId(typ);
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token scale_down(int typ) #SCALE_DOWN:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <SCALE_DOWN> f_head() (
+		  LOOKAHEAD({ typ == LexerTreeConstants.JJTF_EXP }) f_exp()
+		| LOOKAHEAD({ typ == LexerTreeConstants.JJTF_EXP_DA }) f_exp_da()
+		) <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+	  jjtThis.setTypeId(typ);
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token increase(int typ) #INCREASE:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <INCREASE> f_head() (
+		  LOOKAHEAD({ typ == LexerTreeConstants.JJTF_EXP }) f_exp()
+		| LOOKAHEAD({ typ == LexerTreeConstants.JJTF_EXP_DA }) f_exp_da()
+		) <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+	  jjtThis.setTypeId(typ);
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token decrease(int typ) #DECREASE:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <DECREASE> f_head() (
+		  LOOKAHEAD({ typ == LexerTreeConstants.JJTF_EXP }) f_exp()
+		| LOOKAHEAD({ typ == LexerTreeConstants.JJTF_EXP_DA }) f_exp_da()
+		) <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+	  jjtThis.setTypeId(typ);
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token durative_action_def() #DURATION_ACTION_DEF:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <DURATIVE_ACTION> action_name()
+		[<PRIORITY> number()]
+		<PARAMETERS> <LPAREN> typed_list(LexerTreeConstants.JJTVARIABLE) <RPAREN>
+		da_def_body()
+		<RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token da_def_body() #DA_DEF_BODY:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<DURATION> duration_constraint()
+		<CONDITION> da_gd()
+		<EFFECT> da_effect()
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token duration_constraint() #DURATION_CONSTRAINT:
+{
+	Token t = token;
+}
+{
+	try {
+		LOOKAHEAD(2) t=empty_or()
+	|	LOOKAHEAD(2) t=and_simple_duration_constraint()
+	|	LOOKAHEAD(2) t=simple_duration_constraint()
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token and_simple_duration_constraint() #AND_SIMPLE_DURATION_CONSTRAINT:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <AND> (simple_duration_constraint())+ <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token simple_duration_constraint() #SIMPLE_DURATION_CONSTRAINT:
+{
+	Token t = token;
+}
+{
+	try {
+		LOOKAHEAD(2) t=d_op()
+	|	LOOKAHEAD(2) t=at_simple_duration_constraint()
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token at_simple_duration_constraint() #AT_SIMPLE_DURATION_CONSTRAINT:
+{
+	Token t = token;
+}
+{
+	try {
+		LOOKAHEAD(3) t=at_start_simple_duration_constraint()
+	| 	LOOKAHEAD(3) t=at_end_simple_duration_constraint()
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token at_start_simple_duration_constraint() #AT_START_SIMPLE_DURATION_CONSTRAINT:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <AT> <START> simple_duration_constraint() <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token at_end_simple_duration_constraint() #AT_END_SIMPLE_DURATION_CONSTRAINT:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <AT> <END> simple_duration_constraint() <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token d_op() #D_OP:
+{
+	Token t = token;
+}
+{
+	try {
+		LOOKAHEAD(2) t=equal_d_op()
+	|	LOOKAHEAD(2) t=gequal_d_op()
+	| 	LOOKAHEAD(2) t=lequal_d_op()
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token equal_d_op() #EQUAL_D_OP:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <EQUAL> var_duration() d_value() <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token gequal_d_op() #GEQUAL_D_OP:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <GEQUAL> var_duration() d_value() <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token lequal_d_op() #LEQUAL_D_OP:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <LEQUAL> var_duration() d_value() <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token var_duration() #VAR_DURATION:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<VAR_DURATION>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token d_value() #D_VALUE:
+{
+	Token t = token;
+}
+{
+	try {
+		LOOKAHEAD(2) t=number() 
+	| 	LOOKAHEAD(2) t=f_exp()
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token da_gd() #DA_GD:
+{
+	Token t = token;
+}
+{
+	try {
+		LOOKAHEAD(2) t=pref_timed_gd() 
+	|	LOOKAHEAD(2) t=and_da_gd()
+	|	LOOKAHEAD(2) t=forall_da_gd()
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token forall_da_gd() #FORALL_DA_GD:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <FORALL> <LPAREN> typed_list(LexerTreeConstants.JJTVARIABLE) <RPAREN> da_gd() <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token and_da_gd() #AND_DA_GD:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <AND> (da_gd())* <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+
+Token pref_timed_gd() #PREF_TIMED_GD:
+{
+	Token t = token;
+}
+{
+	try {
+		LOOKAHEAD(2) t=timed_gd()
+	|	LOOKAHEAD(2) t=named_pref_timed_gd()
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token named_pref_timed_gd() #NAMED_PREF_TIMED_GD:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <PREFERENCE> [pref_name()] timed_gd() <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token timed_gd() #TIMED_GD:
+{
+	Token t = token;
+}
+{
+	try {
+		LOOKAHEAD(2) t=at_timed_gd()
+	|	LOOKAHEAD(2) t=over_timed_gd()
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token over_timed_gd() #OVER_TIMED_GD:
+{
+	Token t = token;
+}
+{
+	try {
+		t=over_all_timed_gd()
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token over_all_timed_gd() #OVER_ALL_TIMED_GD:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <OVER> <ALL> gd() <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token at_timed_gd() #AT_TIMED_GD:
+{
+	Token t = token;
+}
+{
+	try {
+		LOOKAHEAD(3) t=at_start_timed_gd()
+	|	LOOKAHEAD(2) t=at_end_timed_gd()
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token at_start_timed_gd() #AT_START_TIMED_GD:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <AT> <START> gd() <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token at_end_timed_gd() #AT_END_TIMED_GD:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <AT> <END> gd() <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token interval() #INTERVAL:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<ALL>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token da_effect() #DA_EFFECT:
+{
+	Token t = token;
+}
+{
+	try {
+		LOOKAHEAD(2) t=timed_effect()
+	|	LOOKAHEAD(2) t=and_da_effect() 
+	|	LOOKAHEAD(2) t=forall_da_effect()
+	|	LOOKAHEAD(2) t=when_da_effect()
+	|	LOOKAHEAD(2) t=assign_op(LexerTreeConstants.JJTF_EXP_DA)
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token when_da_effect() #WHEN_DA_EFFECT:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <WHEN> da_gd() timed_effect() <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+
+Token forall_da_effect() #FORALL_DA_EFFECT:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <FORALL> <LPAREN> typed_list(LexerTreeConstants.JJTVARIABLE) <RPAREN> da_effect() <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token and_da_effect() #AND_DA_EFFECT:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <AND> (da_effect())* <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token timed_effect() #TIMED_EFFECT:
+{
+	Token t = token;
+}
+{
+	try {
+		LOOKAHEAD(5) t=at_f_assign_da_effect()
+	|	LOOKAHEAD(2) t=at_da_effect()
+	|	LOOKAHEAD(2) t=assign_op_t() 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token at_f_assign_da_effect() #AT_F_ASSIGN_DA_EFFECT:
+{
+	Token t = token;
+}
+{
+	try {
+		LOOKAHEAD(3) t=at_start_f_assign_da_effect()
+	|	LOOKAHEAD(3) t=at_end_f_assign_da_effect()
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token at_start_f_assign_da_effect() #AT_START_F_ASSIGN_DA_EFFECT:
+{
+	Token t = token;
+}
+{
+	try { 
+		t=<LPAREN> <AT> <START> assign_op(LexerTreeConstants.JJTF_EXP_DA) <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token at_end_f_assign_da_effect() #AT_END_F_ASSIGN_DA_EFFECT:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <AT> <END> assign_op(LexerTreeConstants.JJTF_EXP_DA) <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token at_da_effect() #AT_DA_EFFECT:
+{
+	Token t = token;
+}
+{
+	try {
+		LOOKAHEAD(3) t=at_start_da_effect()
+	|	LOOKAHEAD(3) t=at_end_da_effect()
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token at_start_da_effect() #AT_START_DA_EFFECT:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <AT> <START> effect() <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+
+Token at_end_da_effect() #AT_END_DA_EFFECT:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <AT> <END> effect() <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token assign_op_t() #ASSIGN_OP_T:
+{
+	Token t = token;
+}
+{
+	try {
+		LOOKAHEAD(2) t=increase_assign_op_t()
+	|	LOOKAHEAD(2) t=decrease_assign_op_t() 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token increase_assign_op_t() #INCREASE_ASSIGN_OP_T:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <INCREASE> f_head() f_exp_t() <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token decrease_assign_op_t() #DECREASE_ASSIGN_OP_T:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <DECREASE> f_head() f_exp_t() <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token f_exp_t() #F_EXP_T:
+{
+	Token t = token;
+}
+{
+	try {
+		LOOKAHEAD(2) t=<LPAREN> <MUL> continous_variable() f_exp() <RPAREN>
+	| 	LOOKAHEAD(2) t=<LPAREN> <MUL> f_exp() continous_variable() <RPAREN>
+	| 	LOOKAHEAD(2) t=continous_variable() 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token continous_variable() #CONTINOUS_VARIABLE:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<CONTINOUS_VARIABLE> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		jjtThis.setImage(t.image);
+		return t;
+	}
+	
+}
+
+Token f_exp_da() #F_EXP_DA:
+{
+	Token t = token;
+}
+{
+	try {
+		LOOKAHEAD(3) t=f_exp()
+	|	LOOKAHEAD(3) t=da_op()
+	|	LOOKAHEAD(3) t=var_duration()
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token da_op() #DA_OP:
+{
+	Token t = token;
+}
+{
+	try {
+		LOOKAHEAD(2) t=da_add_op() 
+	|	LOOKAHEAD(2) t=da_substract_op()
+	|	LOOKAHEAD(2) t=da_multiply_op()
+	|	LOOKAHEAD(2) t=da_divide_op()
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token da_add_op() #DA_ADD_OP:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <ADD> f_exp_da() (f_exp_da())+ <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token da_substract_op() #DA_SUBSTRACT_OP:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <SUB> (f_exp_da())+ <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token da_multiply_op() #DA_MULTIPLY_OP:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <MUL> f_exp_da() (f_exp_da())+ <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token da_divide_op() #DA_DIVIDE_OP:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <DIV> f_exp_da() (f_exp_da())+ <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token derived_def() #DERIVED_DEF:
+{
+	Token t = token;
+}
+{
+	try {
+	  t=<LPAREN> <DERIVED> atomic_formula_skeleton() gd() <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token derived_def_declaration() #DERIVED_DEF_DECLARATION:
+{
+	Token t = token;
+}
+{
+	try {
+	  t=<LPAREN> <DERIVED> atomic_formula_skeleton() <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token defined_predicate() #DEFINED_PREDICATE:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <DEFINED_PREDICATE> atomic_formula_skeleton() [LOOKAHEAD(2) local_vars()] gd() <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token defined_predicate_declaration() #DEFINED_PREDICATE_DECLARATION:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <DEFINED_PREDICATE> atomic_formula_skeleton() <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token defined_function() #DEFINED_FUNCTION:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <DEFINED_FUNCTION> typed_function() [LOOKAHEAD(2) local_vars()] gd() <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token defined_function_declaration() #DEFINED_FUNCTION_DECLARATION:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <DEFINED_FUNCTION> typed_function() <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token local_vars() #LOCAL_VARS:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <LOCAL_VARS> function_typed_list(LexerTreeConstants.JJTVARIABLE) <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token problem() #PROBLEM:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <DEFINE> <LPAREN> <PROBLEM> problem_name() <RPAREN> 
+		<LPAREN> <P_DOMAIN> domain_name() <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	[LOOKAHEAD(2) require_def()]
+	[LOOKAHEAD(2) object_declaration()]
+	init()
+	goal()
+	[LOOKAHEAD(2) constraints()]
+	[LOOKAHEAD(2) metric_spec()]
+	// [length-spec()] not implemented
+	<RPAREN> { 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token problem_name() #PROBLEM_NAME:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<SYMBOL>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		jjtThis.setImage(t.image);
+		return t;
+	}
+}
+
+Token domain_name() #DOMAIN_NAME:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<SYMBOL>  
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		jjtThis.setImage(t.image);
+		return t;
+	}
+}
+
+Token object_declaration() #OBJECT_DECLARATION:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <OBJECTS> typed_list(LexerTreeConstants.JJTCONSTANT) <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token init() #INIT:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <INIT> (init_el())* <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token init_el() #INIT_EL:
+{
+	Token t = token;
+}
+{
+	try {
+		LOOKAHEAD(3) t=timed_literal()
+	|	LOOKAHEAD(2) t=literal(LexerTreeConstants.JJTCONSTANT)
+	|	LOOKAHEAD(2) t=equal_init_el() 	
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token equal_init_el() #EQUAL_INIT_EL:
+{
+	Token t = token;
+}
+{	
+	try {
+		t=<LPAREN> <EQUAL> constant_function_head_or_functor() number_or_constant() <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token number_or_constant() #NUMBER_OR_CONSTANT:
+{
+	Token t = token;
+}
+{	
+	try {
+		t=number()
+	| t=constant()
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token timed_literal() #TIMED_LITERAL:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <AT> number() literal(LexerTreeConstants.JJTCONSTANT) <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token goal() #GOAL:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <GOAL> pre_gd() <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token constraints() #CONSTRAINTS:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <CONSTRAINTS> pref_con_gd() <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token pref_con_gd() #PREF_CON_GD:
+{
+	Token t = token;
+}
+{
+	try {
+		LOOKAHEAD(2) t=and_pref_con_gd()
+	|	LOOKAHEAD(2) t=forall_pref_con_gd()
+	| 	LOOKAHEAD(2) t=named_pref_con_gd()
+	|	LOOKAHEAD(2) t=con_gd() 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token and_pref_con_gd() #AND_PREF_CON_GD:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <AND> (pref_con_gd())* <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token named_pref_con_gd() #NAMED_PREF_CON_GD:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <PREFERENCE> [pref_name()] con_gd() <RPAREN> 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token forall_pref_con_gd() #FORALL_PREF_CON_GD:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <FORALL> <LPAREN> typed_list(LexerTreeConstants.JJTVARIABLE) <RPAREN> pref_con_gd() <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token metric_spec() #METRIC_SPEC:
+{
+	Token t = token;
+}
+{	
+	try {
+		LOOKAHEAD(3) t=maximize()
+	| 	LOOKAHEAD(3) t=minimize() 
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token maximize() #MAXIMIZE:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <METRIC> <MAXIMIZE> metric_f_exp() <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token minimize() #MINIMIZE:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <METRIC> <MINIMIZE> metric_f_exp() <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token metric_f_exp() #METRIC_F_EXP:
+{
+	Token t = token;
+}
+{
+	try {
+	  LOOKAHEAD(2) t=multi_op_metric_f_exp()
+	|	LOOKAHEAD(2) t=number()
+	|	LOOKAHEAD(2) t=constant_f_head()
+	|	LOOKAHEAD(2) t=total_time()
+	|	LOOKAHEAD(2) t=violated_pref_exp()
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token violated_pref_exp() #VIOLATED_PREF_EXP:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <IS_VIOLATED> pref_name() <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token constant_f_head() #CONSTANT_F_HEAD:
+{
+	Token t = token;
+}
+{
+	try {
+		t=constant_function_head_or_functor()
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token constant_function_head() #CONSTANT_FUNCTION_HEAD:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> functor() (constant())* <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token constant_function_head_or_functor() #CONSTANT_FUNCTION_HEAD_OR_FUNCTOR:
+{
+	Token t = token;
+}
+{
+	try {
+		t=constant_function_head()
+	|	t=functor()
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token total_time() #TOTAL_TIME:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<TOTAL_TIME>
+	|	t=<LPAREN> <TOTAL_TIME> <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token multi_op_metric_f_exp() #MULTI_OP_METRIC_F_EXP:
+{
+	Token t = token;
+}
+{
+	try {
+	  LOOKAHEAD(2) t=add_narity_op_metric_f_exp()
+	| LOOKAHEAD(2) t=substract_narity_op_metric_f_exp()
+	| LOOKAHEAD(2) t=multiply_narity_op_metric_f_exp()
+	| LOOKAHEAD(2) t=divide_narity_op_metric_f_exp()
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token multiply_narity_op_metric_f_exp() #MULTIPLY_NARITY_OP_METRIC_F_EXP:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <MUL> metric_f_exp() (metric_f_exp())+ <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token divide_narity_op_metric_f_exp() #DIVIDE_NARITY_OP_METRIC_F_EXP:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <DIV> metric_f_exp() (metric_f_exp())+ <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token add_narity_op_metric_f_exp() #ADD_NARITY_OP_METRIC_F_EXP:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <ADD> metric_f_exp() (metric_f_exp())+ <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+Token substract_narity_op_metric_f_exp() #SUBSTRACT_NARITY_OP_METRIC_F_EXP:
+{
+	Token t = token;
+}
+{
+	try {
+		t=<LPAREN> <SUB> (metric_f_exp())+ <RPAREN>
+	} catch (Throwable e) {
+		this.error(e, t.beginLine, t.beginColumn);
+	}
+	{ 
+		jjtThis.setLine(t.beginLine);
+		jjtThis.setColumn(t.beginColumn);
+		return t;
+	}
+}
+
+
+
+
