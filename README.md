@@ -1,5 +1,11 @@
 # Neptune Project
 
+This work is a part of PhD reserch in autonomic cloud computing from since 2004.
+
+Please follow publications attached to the work of enhancing Neptune Framework:
+
+https://www.researchgate.net/profile/Yasir_Karam/contributions
+
  The platform we worked on which is embraced by the code and miniature IDE, apart from the UI elements and framework used the architecture included the following:
 
 - A software architecture of illuminating Autonomous Agent Oriented Software Engineering platform, following BDI and some other cognitive architecture c/c's like Actor Model and asynchronous constraint concurrent programming paradigm
@@ -128,7 +134,7 @@ https://www.quora.com/What-is-Theosophic-Computing/answer/Peter-Fisk-3?srid=MmrA
 
 A. Defining Theosohpy
 
-“Gaining a direct knowledge of God is the utmost goal of Theosophy
+Â“Gaining a direct knowledge of God is the utmost goal of Theosophy
 
 There are more complete definitions but this seems to be the core of the philosophy.
 
@@ -140,25 +146,25 @@ It is often believed that scientific progress will be able to explain all of the
 
 C. Heisenberg and The Uncertainty Principle
 
-With the development of quantum mechanics in the 1930’s, it became apparent that we will never be able to fully understand the natural world regardless of how sophisticated our technology. Heisenberg’s uncertainty principle limits the accuracy of any measurements that we can make. And the double slit experiment still baffles theorists. From experiments, we know that quantum theory is valid, but we certainly do not understand it.
+With the development of quantum mechanics in the 1930Â’s, it became apparent that we will never be able to fully understand the natural world regardless of how sophisticated our technology. HeisenbergÂ’s uncertainty principle limits the accuracy of any measurements that we can make. And the double slit experiment still baffles theorists. From experiments, we know that quantum theory is valid, but we certainly do not understand it.
 
 D. Mathematical Mysteries
 
-Euler’s Identity relates five fundamental mathematical constants. Richard Feynman called in the “the most remarkable formula in mathematics”. All the constants were derived independently over the centuries. We have absolutely no idea of why they are related to one another by a simple formula.
+EulerÂ’s Identity relates five fundamental mathematical constants. Richard Feynman called in the Â“the most remarkable formula in mathematicsÂ”. All the constants were derived independently over the centuries. We have absolutely no idea of why they are related to one another by a simple formula.
 
 E. Computational Mysteries
 
 With the development of computers, mathematicians have been able to explore generated set of numbers. One of these generated sequences is known as the Mandelbrot set which when displayed graphically displays an infinite set of complex images starting from a very simple formula. Simple formulas will normally display simple patterns when plotted. There is no understanding of why Mandelbrot sets are so different - they should not exists but they do.
 
-F. Wolfram’s New Kind of Science
+F. WolframÂ’s New Kind of Science
 
 Steven Wolfram published a book in 2002 called A New Kind of Science which explains the natural world in terms of computational algorithms rather than classical physics. The theory contains many insights but is very controversial.
 
 G. Simulation Hypothesis
 
-The simulation hypothesis proposes that reality is in fact a simulation. This could explain many mysteries including Euler’s Identity, Mandelbrot Sets, and Quantum Mechanics.
+The simulation hypothesis proposes that reality is in fact a simulation. This could explain many mysteries including EulerÂ’s Identity, Mandelbrot Sets, and Quantum Mechanics.
 
-There doesn’t seem to be any definite reason why this would be impossible.
+There doesnÂ’t seem to be any definite reason why this would be impossible.
 
 Summary
 
