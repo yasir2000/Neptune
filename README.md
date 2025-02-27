@@ -39,12 +39,7 @@ Hence am in a position to start deploying new plan of proliferating the work pub
 - Most importantly the architecture philosophy roadmap which brought the term of [[Theosophic Computing]] to live. Here in this course, I want to randomize new challenges of  following [[Cognitive Architecture]] and more beyond the work of BenGoertzel to address new challenges of the [[God Divinity]] architecture or the [[Meaning of Life]] as God is the greatest architect of the universe. 
 
 1- I want to publish latest code v 2.0 which was running before over the scripting IDE, which was a cloud based tool to build blocks of Agent Based Software Eng. and as I mentioned AI was the latest arm and mechanics for AI planning and AI search to commit agent transactions over MVC or route based architecture to build rapid applications on the cloud.
-
-
-2- To also mention that another approach which went commercial from our prev colleagues is now running as intelligence support to enhance client side UI/UX over SAP HANA Fiori. The guys of talents from SAP collated with original code to build an AI platform on client side Fiori (they are based in Oslo) 
-
-http://www.neptune-software.com/how-to-set-up-push-notifications-with-smp-cloud-and-neptune-software/ 
-
+ 
 3- I have been researching and further complementing another different direction which I have published by last paper on March 2013 [[Oblivion Clouds: Towards Self-Conscious Cloud Based Application Development]], the approach I was working on through almost 5 years now from 2012, and on is the efforts to go more deep into and maybe farther than Cognitive Architecture were many possibilities to investigate there, entouching Neptune's untouched areas in the area of Cognitive Computing.
 
 
